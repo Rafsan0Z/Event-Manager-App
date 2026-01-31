@@ -10,6 +10,14 @@ from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
 
+def DocFactory():
+    try:
+        new_handler = DocHandler()
+    except RuntimeError as r:
+        print("You cant request any more handlers!!")
+    else:
+        return new_handler
+
 class DocHandler:
 
     num = 0
@@ -76,8 +84,6 @@ class DocHandler:
         except HttpError as h:
             print(h)
 
-test = DocHandler()
-test2 = DocHandler()
-#test.test_doc()
 
-    
+test = DocFactory()
+should_fail = DocFactory()
