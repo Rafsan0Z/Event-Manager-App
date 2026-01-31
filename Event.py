@@ -30,3 +30,6 @@ class Event:
 
     def edit_date(self):
         pass
+
+    def set_host(self, host):
+        self.host = host
