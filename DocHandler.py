@@ -12,11 +12,22 @@ from pathlib import Path
 
 class DocHandler:
 
+    num = 0
+
+    def __new__(cls, *args, **kargs):
+        if DocHandler.num > 0:
+            raise RuntimeError("You cannot create any more handlers!")
+        else:
+            return super().__new__(cls)
+
     def __init__(self):
         load_dotenv()
         self.creds = None
         self.validate()
+        DocHandler.num += 1
 
+    def __del__(self):
+        DocHandler.num -= 1
 
     def validate(self):
         self.SCOPES = [os.getenv('DRIVE_SCOPE'), os.getenv('DOC_SCOPE')]
@@ -66,6 +77,7 @@ class DocHandler:
             print(h)
 
 test = DocHandler()
-test.test_doc()
+test2 = DocHandler()
+#test.test_doc()
 
     
