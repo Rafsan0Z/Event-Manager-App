@@ -1,5 +1,6 @@
 import os.path
 import os
+import json
 from datetime import datetime, timezone, timedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -40,6 +41,31 @@ class DocHandler:
     def pull_doc(self):
         pass
 
+    def dump_json(self, name, entry):
+        with open(name, 'a') as input:
+            json.dump(entry,input,indent=4)
+
+    def test_doc(self):
+        try:
+            self.service = build("docs", 'v1', credentials=self.creds)
+            document = self.service.documents().get(
+                documentId=os.getenv("TEST_FILE_ID"),
+                includeTabsContent=True
+            ).execute()
+            print("Lets test this, here is the title: {title}".format(title=document.get('title')))
+            
+            for tab in document['tabs']:
+                print(tab['tabProperties']['title'])
+                if len(tab.get('childTabs', [])) > 0:
+                    print("These have subtabs")
+                    for subTab in tab['childTabs']:
+                        print(subTab['tabProperties']['title'])
+                        print(type(subTab['documentTab']['body']['content']))
+                        self.dump_json("test.json", subTab['documentTab']['body']['content'])
+        except HttpError as h:
+            print(h)
+
 test = DocHandler()
+test.test_doc()
 
     
