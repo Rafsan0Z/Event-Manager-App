@@ -18,7 +18,7 @@ class DocHandler:
 
 
     def validate(self):
-        self.SCOPES = [os.getenv('DRIVE_SCOPE')]
+        self.SCOPES = [os.getenv('DRIVE_SCOPE'), os.getenv('DOC_SCOPE')]
         authen_path = str(Path(__file__).parent) + os.getenv('AUTHENTIFICATION_PATH')
         token_path = str(Path(__file__).parent) + os.getenv('TOKEN_PATH')
         if os.path.exists(token_path):
