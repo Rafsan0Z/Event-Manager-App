@@ -115,6 +115,11 @@ class NotAnEventException(WrongTypeException):
     def __init__(self, instance):
         super().__init__(instance, "Event")
 
+class NotADayException(WrongTypeException):
+
+    def __init__(self, instance):
+        super().__init__(instance, "Day")
+
 class NotAMonthException(WrongTypeException):
     
     def __init__(self, instance):

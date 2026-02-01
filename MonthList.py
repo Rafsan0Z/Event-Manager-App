@@ -22,7 +22,7 @@ class MonthList(MutableSequence):
         self.months[i] = month
 
     def __delitem__(self, i):
-        pass
+        del self.months[i]
 
     def insert(self, i, month):
         self.check_month_item(month)

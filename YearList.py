@@ -5,7 +5,6 @@ class YearList(MutableSequence):
 
     def __init__(self):
         self.years = []
-        self.size = 0
     
     def __len__(self):
         return len(self.years)

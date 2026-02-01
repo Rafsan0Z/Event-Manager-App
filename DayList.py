@@ -1,5 +1,6 @@
 from collections.abc import MutableSequence
 from Day import Day
+from EventExceptions import NotADayException
 
 class DayList(MutableSequence):
     
@@ -12,16 +13,22 @@ class DayList(MutableSequence):
         return len(self.days)
     
     def __getitem__(self, i):
-        pass
+        return self.days[i]
+
+    def check_day_type(self, day_candidate):
+        if not isinstance(day_candidate, Day):
+            raise NotADayException(day_candidate)
 
     def __setitem__(self, i, day):
-        pass
+        self.check_day_type(day)
+        self.days[i] = day
 
     def __delitem__(self, i):
-        pass
+        del self.days[i]
 
     def insert(self, i, day):
-        pass
+        self.check_day_type(day)
+        self.days.insert(i, day)
 
     def isDayIncluded(self, day):
         pass

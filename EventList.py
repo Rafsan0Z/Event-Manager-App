@@ -11,19 +11,25 @@ class EventList(MutableSequence):
         return len(self.events)
     
     def num_events(self):
-        return self.__len__()
+        return len(self)
 
-    def __getitem__(self):
-        pass
+    def __getitem__(self, i):
+        return self.events[i]
 
-    def __setitem__(self):
-        pass
+    def check_event_type(self, event_candidate):
+        if not isinstance(event_candidate, Event):
+            raise NotAnEventException(event_candidate)
 
-    def __delitem__(self):
-        pass
+    def __setitem__(self, i, event):
+        self.check_event_type(event)
+        self.events[i] = event
 
-    def insert(self):
-        pass
+    def __delitem__(self, i):
+        del self.events[i]
+
+    def insert(self, i, event):
+        self.check_event_type(event)
+        self.events.insert(i, event)
 
     def add_event(self, event):
         if not isinstance(event, Event):
