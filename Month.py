@@ -1,9 +1,9 @@
 from Event import Event
 from Day import Day
 from DayList import DayList
-from EventExceptions import test_month
+from EventExceptions import test_month, date_dict
 
-class Month:
+class Month(DayList):
     
     def __new__(cls, month_name):
         test_month(month_name)
@@ -12,19 +12,11 @@ class Month:
 
     def __init__(self, month_name):
         self.month = month_name
-        self.days = DayList(month_name)
-
-    def num_events(self):
-        total = 0
-        for day in self.days:
-            total += day.num_events()
-        return total
-    
-    def isDayIncluded(self):
-        pass
+        self.max_days = date_dict[month_name.lower().strip()]
+        self.days = DayList()
 
     def add_day(self):
-        assert self.days <= 31, "There are too many days"
+        assert len(self.days) > self.max_days, "There are too many days"
         pass
 
     def __str__(self):

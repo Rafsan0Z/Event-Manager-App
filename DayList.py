@@ -1,12 +1,11 @@
 from collections.abc import MutableSequence
 from Day import Day
-from EventExceptions import date_dict
 
 class DayList(MutableSequence):
     
-    def __init__(self, month_name):
-        self.month_name = month_name
-        self.max_days = date_dict[month_name.lower().strip()]
+    def __init__(self):
+        #self.month_name = month_name
+        #self.max_days = date_dict[month_name.lower().strip()]
         self.days = []
     
     def __len__(self):
@@ -23,6 +22,15 @@ class DayList(MutableSequence):
 
     def insert(self, i, day):
         pass
+
+    def isDayIncluded(self, day):
+        pass
+
+    def num_events(self):
+        total = 0
+        for day in self.days:
+            total += day.num_events()
+        return total
 
     def __day_search(self, day):
         pass
