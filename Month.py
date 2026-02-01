@@ -1,8 +1,14 @@
 from Event import Event
 from Day import Day
+from EventExceptions import test_month
 
 class Month:
     
+    def __new__(cls, month_name):
+        test_month(month_name)
+        return super().__new__(cls)
+    
+
     def __init__(self, month_name):
         self.month = month_name
         self.days = []
@@ -17,7 +23,7 @@ class Month:
         pass
 
     def add_day(self):
-        assert(self.days <= 31, "There are too many days")
+        assert self.days <= 31, "There are too many days"
         pass
 
     def __str__(self):
@@ -29,9 +35,10 @@ class Month:
             for event in day:
                 result += "{index}. {detail}\n".format(index=event_index+1, detail=event)
             result += "------------------------------\n"
+    
 
 
-
-
+# test = Month('January')
+# print(test.month)
 
 
