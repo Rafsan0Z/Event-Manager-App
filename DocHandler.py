@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
-from MonthList import Month_List as Months
+from Month import Month
 
 def DocFactory():
     try:
@@ -67,7 +67,7 @@ class DocHandler:
     
     def process_subTab(self, subTab):
         test_string = ""
-        new_month = Months(subTab['tabProperties']['title'])
+        new_month = Month(subTab['tabProperties']['title'])
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']:

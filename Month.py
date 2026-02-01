@@ -1,7 +1,7 @@
 from Event import Event
 from Day import Day
 
-class Month_List:
+class Month:
     
     def __init__(self, month_name):
         self.month = month_name
@@ -11,7 +11,14 @@ class Month_List:
         total = 0
         for day in self.days:
             total += day.num_events()
-        return total 
+        return total
+    
+    def isDayIncluded(self):
+        pass
+
+    def add_day(self):
+        assert(self.days <= 31, "There are too many days")
+        pass
 
     def __str__(self):
         result = self.month + '\n'

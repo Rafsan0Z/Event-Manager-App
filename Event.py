@@ -16,6 +16,9 @@ class Event:
     def __init__(self, event_string):
         self.event_string = event_string
         self.process_event_string()
+
+    def __str__(self):
+        return "{name} ({duration}) [{notes}]".format(name=self.name,duration=self.duration,notes=self.notes)
     
     def process_event_string(self):
         pass
