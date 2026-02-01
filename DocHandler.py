@@ -71,9 +71,7 @@ class DocHandler:
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']:
-                    for element in line['paragraph']['elements']:
-                        pass
-                        #test_string += element['textRun']['content']
+                    event_string = line['paragraph']['elements'][0] #There should only be one
                 else:
                     month_string = line['paragraph']['elements'][0]['textRun']['content'].strip()
                     print(month_string)

@@ -12,6 +12,13 @@ class Event:
         self.synchronous = False
         self.notes_taken = False
         self.recorded = False
+
+    def __init__(self, event_string):
+        self.event_string = event_string
+        self.process_event_string()
+    
+    def process_event_string(self):
+        pass
     
     def edit_name(self):
         pass
