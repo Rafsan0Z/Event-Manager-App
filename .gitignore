@@ -1,3 +1,4 @@
 .env
 **/authen/
 test.json
+*.pyc

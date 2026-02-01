@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
+from MonthList import Month_List as Months
 
 def DocFactory():
     try:
@@ -63,6 +64,23 @@ class DocHandler:
     def dump_json(self, name, entry):
         with open(name, 'a') as input:
             json.dump(entry,input,indent=4)
+    
+    def process_subTab(self, subTab):
+        test_string = ""
+        new_month = Months(subTab['tabProperties']['title'])
+        for line in subTab['documentTab']['body']['content']:
+            if 'paragraph' in line:
+                if 'bullet' in line['paragraph']:
+                    for element in line['paragraph']['elements']:
+                        pass
+                        #test_string += element['textRun']['content']
+                else:
+                    month_string = line['paragraph']['elements'][0]['textRun']['content'].strip()
+                    print(month_string)
+        return test_string
+
+
+
 
     def test_doc(self):
         try:
@@ -73,17 +91,17 @@ class DocHandler:
             ).execute()
             print("Lets test this, here is the title: {title}".format(title=document.get('title')))
             
-            for tab in document['tabs']:
+            for tab in document['tabs'][1:]:
                 print(tab['tabProperties']['title'])
                 if len(tab.get('childTabs', [])) > 0:
                     print("These have subtabs")
                     for subTab in tab['childTabs']:
                         print(subTab['tabProperties']['title'])
-                        print(type(subTab['documentTab']['body']['content']))
-                        self.dump_json("test.json", subTab['documentTab']['body']['content'])
+                        #self.process_subTab(subTab)
+                        #self.dump_json("test.json", subTab['documentTab']['body']['content'])
         except HttpError as h:
             print(h)
 
 
 test = DocFactory()
-should_fail = DocFactory()
+test.test_doc()

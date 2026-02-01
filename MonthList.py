@@ -1,9 +1,9 @@
 from Event import Event
 class Month_List:
     
-    def __init__(self):
+    def __init__(self, month_name):
         self.events = []
-        self.month = ''
+        self.month = month_name
 
     
     def add_event(self, event):
