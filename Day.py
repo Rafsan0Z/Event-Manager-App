@@ -1,10 +1,17 @@
 from Event import Event
+from EventExceptions import is_day, test_day
 class Day:
     
-    def __init__(self, month_name):
-        self.date_num = None
-        self.day_name = None
+    def __new__(cls, *args, **kwargs):
+        is_day(args[1])
+        test_day(args[1],args[0],args[3],args[2])
+        return super().__new__(cls)
+
+    def __init__(self, month_name, day_name, date_num, year_num):
+        self.day_name = day_name
+        self.date_num = date_num
         self.month_name = month_name
+        self.year_num = year_num
         self.events = []
 
     def get_date_num(self):
@@ -37,3 +44,6 @@ class Day:
     
     def num_events(self):
         return len(self.events)
+    
+
+# test = Day('January',"Saturday",30,2025)

@@ -1,4 +1,13 @@
 from datetime import date
+days_list = [
+    'monday',
+    'tuesday',
+    'wednesday',
+    'thursday',
+    'friday',
+    'saturday',
+    'sunday'
+]
 month_list = [
         'january',
         'february',
@@ -43,6 +52,19 @@ class BadMonthException(Exception):
         )
 
 
+class NotRealDayException(Exception):
+
+    def __init__(self, day_name):
+        self.message = "This is not a correct day name"
+        self.day_name = day_name
+        super().__init__(self.message)
+
+    def __str__(self):
+        return "{message}: {day_name}".format(
+            message = self.message,
+            day_name = self.day_name
+        )
+
 class WrongDayException(Exception):
 
     def __init__(self, message, wrong_day, real_day):
@@ -71,15 +93,29 @@ class WrongDateException(Exception):
             date=self.date_num
         )
 
+def lower_strings(*strings):
+    if len(strings) == 1:
+        return strings[0].lower().strip()
+    else:
+        return [string.lower().strip() for string in strings]
+
+
+def is_day(day_name):
+    day_name = lower_strings(day_name)
+    if day_name in days_list:
+        return True
+    else:
+        raise NotRealDayException(day_name)
 
 def test_month(month_name):
-    month_name = month_name.lower().strip()
+    month_name = lower_strings(month_name)
     if month_name in month_list:
         return True
     else:
         raise BadMonthException("The month does not exist!", month_name)
 
 def test_date(month_name, date_num):
+    month_name = lower_strings(month_name)
     test_month(month_name)
     if 1 <= date_num <= date_dict[month_name]:
         return True
@@ -87,7 +123,7 @@ def test_date(month_name, date_num):
         raise WrongDateException("The given date is out of range for the given month", date_num)
 
 def test_day(day_name, month_name, year_num, date_num):
-    day_name = day_name.lower().strip()
+    month_name, day_name = lower_strings(month_name, day_name)
     test_month(month_name)
     test_date(month_name, date_num)
     comparison_day = date(year_num, month_list.index(month_name) + 1,date_num).strftime("%A").lower().strip()
