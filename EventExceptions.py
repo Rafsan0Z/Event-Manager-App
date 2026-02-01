@@ -93,6 +93,20 @@ class WrongDateException(Exception):
             date=self.date_num
         )
 
+class NotAnEventException(Exception):
+
+    def __init__(self, instance):
+        self.message = "Not an instance of an Event class"
+        self.instance = instance
+        super().__init__(self.message)
+
+    def __str__(self):
+        return "{message}: But of {other} instead".format(
+            message = self.message,
+            other = type(self.instance)
+        )
+
+
 def lower_strings(*strings):
     if len(strings) == 1:
         return strings[0].lower().strip()

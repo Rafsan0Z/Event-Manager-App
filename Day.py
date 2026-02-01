@@ -1,5 +1,5 @@
 from Event import Event
-from EventExceptions import is_day, test_day
+from EventExceptions import is_day, test_day, NotAnEventException
 class Day:
     
     def __new__(cls, *args, **kwargs):
@@ -28,7 +28,7 @@ class Day:
     
     def add_event(self, event):
         if not isinstance(event, Event):
-            print("Placeholder for an ErrorType!")
+            raise NotAnEventException(event)
         else:
             self.events.append(event)
     
@@ -46,4 +46,5 @@ class Day:
         return len(self.events)
     
 
-# test = Day('January',"Saturday",30,2025)
+# test = Day('January',"Saturday",31,2026)
+# test.add_event("I promise is this an event")
