@@ -1,5 +1,6 @@
 from Event import Event
 from Day import Day
+from DayList import DayList
 from EventExceptions import test_month
 
 class Month:
@@ -11,7 +12,7 @@ class Month:
 
     def __init__(self, month_name):
         self.month = month_name
-        self.days = []
+        self.days = DayList(month_name)
 
     def num_events(self):
         total = 0
@@ -35,7 +36,7 @@ class Month:
             for event in day:
                 result += "{index}. {detail}\n".format(index=event_index+1, detail=event)
             result += "------------------------------\n"
-    
+
 
 
 # test = Month('January')
