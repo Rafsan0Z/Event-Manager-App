@@ -93,19 +93,37 @@ class WrongDateException(Exception):
             date=self.date_num
         )
 
-class NotAnEventException(Exception):
+class WrongTypeException(Exception):
 
-    def __init__(self, instance):
-        self.message = "Not an instance of an Event class"
-        self.instance = instance
+    def __init__(self, other_type, this_type = None):
+        self.other_type = other_type
+        if this_type: 
+            self.this_type = this_type
+        else:
+            self.this_type = type(self)
+        self.message = "Not an instance of a " + this_type + " class"
         super().__init__(self.message)
 
     def __str__(self):
         return "{message}: But of {other} instead".format(
             message = self.message,
-            other = type(self.instance)
+            other = type(self.other_type)
         )
 
+class NotAnEventException(WrongTypeException):
+
+    def __init__(self, instance):
+        super().__init__(instance, "Event")
+
+class NotAMonthException(WrongTypeException):
+    
+    def __init__(self, instance):
+        super().__init__(instance, "Month")
+
+class NotAnYearException(WrongTypeException):
+    
+    def __init__(self, instance):
+        super().__init__(instance, "Year")
 
 def lower_strings(*strings):
     if len(strings) == 1:
@@ -149,3 +167,7 @@ def test_day(day_name, month_name, year_num, date_num):
 #test_month("MakeUpMonth")
 #test_date('february', 28)
 #test_day("friday", 'february', 2026, 28)
+
+#raise NotAnEventException("oops")
+#raise NotAnYearException(1003)
+#raise NotAMonthException(True)

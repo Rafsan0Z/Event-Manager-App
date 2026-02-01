@@ -1,19 +1,15 @@
 from Month import Month
+from MonthList import MonthList
 
 class Year:
 
     def __init__(self, number):
         self.number = number
-        self.months = []
+        self.months = MonthList()
     
 
-    def add_month(self, month_name):
-        try:
-            new_month = Month(month_name)
-        except Exception as e:
-            print(e)
-        else:
-            self.months.append(new_month)
+    def add_month(self, month_name): 
+        self.months.add_month(month_name)
     
 
     def give_events(self):
