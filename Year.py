@@ -1,15 +1,10 @@
-from Month import Month
-from MonthList import MonthList
+from MonthList import MonthList, Month
 
-class Year:
+class Year(MonthList):
 
     def __init__(self, number):
         self.number = number
-        self.months = MonthList()
-    
-
-    def add_month(self, month_name): 
-        self.months.add_month(month_name)
+        super().__init__()
     
 
     def give_events(self):
@@ -18,10 +13,7 @@ class Year:
                 for event in day:
                     yield event
 
-    
-    def give_months(self):
-        for month in self.months:
-            yield month
-    
-    def __iter__(self):
-        return self.give_months()
+
+# test = Year(2026)
+# test.append(Month('january'))
+# print(test[0])
