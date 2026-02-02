@@ -31,4 +31,9 @@ class YearList(MutableSequence):
         self.check_year_type(year)
         self.append(year)
 
+    def __str__(self):
+        result = "--------------------------------Collection of All Events--------------------------------\n"
+        for year in self.years:
+            result += str(year)
+        return result
 

@@ -33,11 +33,12 @@ class Year(MonthList):
             for day in month.days:
                 for event in day:
                     yield event
-
-    def __str__(self): #will be changed
-        result = ''
-        for month in self.months:
-            result += month.month + '\n'
+    
+    def __str__(self):
+        result = "--------------------------------{year}--------------------------------\n".format(
+            year = self.number
+        )
+        result += super().__str__()
         return result
 
 

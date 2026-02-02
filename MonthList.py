@@ -38,3 +38,9 @@ class MonthList(MutableSequence):
 
     def __iter__(self):
         return self.give_months()
+    
+    def __str__(self):
+        result = ''
+        for month in self.months:
+            result += str(month)
+        return result

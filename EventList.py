@@ -45,3 +45,10 @@ class EventList(MutableSequence):
 
     def __iter__(self):
         return self.give_events()
+
+    def __str__(self):
+        result = ''
+        event_index = 0
+        for event in self.events:
+            result += str(event_index + 1) + ". " + str(event) + '\n'
+        return result

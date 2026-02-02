@@ -21,18 +21,12 @@ class Month(DayList):
         pass
 
     def __str__(self):
-        result = self.month + '\n'
-        for day in self.days:
-            result += "------------------------------\n"
-            result += "For the day {name}:\n".format(name=day.get_day_name() + " " + day.get_date_num())
-            event_index = 0
-            for event in day:
-                result += "{index}. {detail}\n".format(index=event_index+1, detail=event)
-            result += "------------------------------\n"
+        result = "For {month}: \n".format(month = self.month)
+        result += super().__str__()
+        return result
 
-
-
-# test = Month('January')
+#test = Month('January')
+#print(test)
 # print(test.month)
 
 

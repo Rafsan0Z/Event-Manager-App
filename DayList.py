@@ -39,10 +39,23 @@ class DayList(MutableSequence):
             total += day.num_events()
         return total
 
+    def __str__(self):
+        result = ''
+        for day in self.days:
+            result += "--------------------------------\n"
+            result += str(day)
+            result += "--------------------------------\n"
+        return result
+
     def __day_search(self, day):
         pass
 
     def add_day(self, day): #This should input the day in a sorted manner
         pass
 
+    def give_days(self):
+        for day in self.days:
+            yield day
     
+    def __iter__(self):
+        return self.give_days()

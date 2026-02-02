@@ -26,5 +26,17 @@ class Day(EventList):
     def set_day_name(self, day):
         self.day_name = day    
 
-# test = Day('January',"Saturday",31,2026)
+    def __str__(self):
+        result = "{day} {month} {date}\n".format(
+            day = self.day_name,
+            month = self.month_name,
+            date = self.date_num
+        )
+        result += super().__str__()
+        return result
+
+
+
+#test = Day('January',"Saturday",31,2026)
+#print(test)
 # test.add_event("I promise is this an event")
