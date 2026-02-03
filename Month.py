@@ -1,7 +1,7 @@
 from Event import Event
 #from Day import Day
 from DayList import DayList
-from EventExceptions import test_month, date_dict
+from EventExceptions import test_month, test_day, date_dict
 import math
 
 class Month(DayList):
@@ -40,8 +40,7 @@ class Month(DayList):
         if final_index != i and i != len(self):
             print("The index you provided is not correct, but we've inserted the day in the correct position")
         if self.year_num:
-            # if the day name doesn't match up reject it
-            pass
+            test_day(day.day_name, self.month, self.year_num, day.date_num)
         self.insert(final_index, day)
 
     def __str__(self):

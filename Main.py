@@ -1,7 +1,14 @@
+from YearList import YearList
+from Year import Year
+from Month import Month
+from Day import Day
+from Event import Event
+from DocHandler import DocFactory
+
 class Main:
 
     def __init__(self):
-        pass
+        self.handler = DocFactory()
 
     def grab_events():
         pass
@@ -63,6 +70,4 @@ class Main:
 
     def total_time():
         pass
-
-
 
