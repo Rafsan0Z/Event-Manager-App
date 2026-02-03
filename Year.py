@@ -7,6 +7,9 @@ class Year(MonthList):
         self.__claimed_months = []
         super().__init__()
     
+    def give_year_to_month(self, month):
+        setattr(month, 'year_num', self.number)
+
     def __setitem__(self, i, month):
         self.check_month_item(month)
         current_month_name = self[i].month
@@ -18,6 +21,7 @@ class Year(MonthList):
             self.__claimed_months.remove(current_month_name)
             self.__claimed_months.append(month.month)
 
+        self.give_year_to_month(month)
         self.months[i] = month
 
     def insert(self, i, month):
@@ -25,6 +29,7 @@ class Year(MonthList):
         if month.month in self.__claimed_months:
             raise Exception("This month is already claimed!")
         else:
+            self.give_year_to_month(month)
             self.__claimed_months.append(month.month)
             self.months.insert(i, month)
 
@@ -47,6 +52,7 @@ class Year(MonthList):
 # test.append(Month('january'))
 # test.append(Month('february'))
 # test.append(Month('march'))
+# print(test[-1].month, test[-1].year_num)
 # test[-1] = Month('april')
 # test.append(Month('march'))
 # print(test)
