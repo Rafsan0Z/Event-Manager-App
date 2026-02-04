@@ -10,6 +10,7 @@ from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
 from Month import Month
+import shelve
 
 def DocFactory():
     try:
@@ -37,6 +38,10 @@ class DocHandler:
 
     def __del__(self):
         DocHandler.num -= 1
+
+    def flush_to_database(yearlist):
+        with shelve.open("Event_DB") as db:
+            db['YearList'] = yearlist
 
     def validate(self):
         self.SCOPES = [os.getenv('DRIVE_SCOPE'), os.getenv('DOC_SCOPE')]
@@ -71,7 +76,13 @@ class DocHandler:
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']:
-                    event_string = line['paragraph']['elements'][0] #There should only be one
+                    event_string = line['paragraph']['elements'][0]['textRun']['content'].strip() #There should only be one
+                    print(event_string)
+                    time_string = event_string[:event_string.index(':')]
+                    note_string = ''
+                    if '[' in event_string and ']' in event_string:
+                        note_string = event_string[event_string.index("[") + 1:event_string.rindex("]")]
+                    print(note_string)
                 else:
                     month_string = line['paragraph']['elements'][0]['textRun']['content'].strip()
                     print(month_string)
@@ -95,7 +106,7 @@ class DocHandler:
                     print("These have subtabs")
                     for subTab in tab['childTabs']:
                         print(subTab['tabProperties']['title'])
-                        #self.process_subTab(subTab)
+                        self.process_subTab(subTab)
                         #self.dump_json("test.json", subTab['documentTab']['body']['content'])
         except HttpError as h:
             print(h)
