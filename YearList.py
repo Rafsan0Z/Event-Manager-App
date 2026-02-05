@@ -36,4 +36,11 @@ class YearList(MutableSequence):
         for year in self.years:
             result += str(year)
         return result
+    
+    def search_years(self, year_num = None):
+        if not year_num: return self
+        filtered = []
+        for year in self.years:
+            if year.year_num == year_num: filtered.append(year)
+        return filtered
 

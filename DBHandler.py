@@ -35,17 +35,13 @@ class DBHandler:
         with shelve.open("Event_DB") as db:
             db['YearList'] = self.year_list
 
-    def grab_events(year_num = None, month_name = None, day_name = None, date_num = None):
-        if year_num:
-            if month_name:
-                if date_num:
+    def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None):
+        for year in self.year_list.search_years(year_num):
+            #print the year num here
+            for month in year.search_months(month_name):
+                #print the month here
+                for day in month.search_days(day_name):
+                    #print the day (and date number) here
                     pass
-                    # get it from self.year_list[year_num].get_month(month_name)[date_num]
-                    # if the above doesn't match then we return nothing
-                else:
-                    pass
-            else:
-                pass
-        else:
-            pass
+                    #print the events here
     

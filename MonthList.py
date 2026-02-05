@@ -44,3 +44,10 @@ class MonthList(MutableSequence):
         for month in self.months:
             result += str(month)
         return result
+    
+    def search_months(self, month_name = None):
+        if not month_name: return self
+        filtered = []
+        for month in self.months:
+            if month.month == month_name: filtered.append(month)
+        return filtered
