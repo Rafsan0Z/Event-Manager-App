@@ -42,6 +42,7 @@ class DBHandler:
                 #print the month here
                 for day in month.search_days(day_name):
                     #print the day (and date number) here
-                    pass
-                    #print the events here
+                    for event in day:
+                        #print the event here
+                        pass
     
