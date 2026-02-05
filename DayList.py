@@ -5,8 +5,6 @@ from EventExceptions import NotADayException
 class DayList(MutableSequence):
     
     def __init__(self):
-        #self.month_name = month_name
-        #self.max_days = date_dict[month_name.lower().strip()]
         self.days = []
     
     def __len__(self):
@@ -59,3 +57,12 @@ class DayList(MutableSequence):
     
     def __iter__(self):
         return self.give_days()
+    
+    def search_days(self, day_name):
+        filtered = []
+        for day in self.days:
+            if day.day_name == day_name: filtered.append(day)
+        if len(filtered):
+            return filtered
+        else:
+            return self.give_days()

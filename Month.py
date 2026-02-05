@@ -1,5 +1,3 @@
-from Event import Event
-#from Day import Day
 from DayList import DayList
 from EventExceptions import test_month, test_day, date_dict
 import math

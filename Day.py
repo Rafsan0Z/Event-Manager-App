@@ -10,9 +10,6 @@ class Day(EventList):
 
     def __init__(self, day_name):
         self.day_name = day_name
-        #self.date_num = date_num
-        #self.month_name = month_name
-        #self.year_num = year_num
         super().__init__()
 
     def get_date_num(self):

@@ -1,26 +1,29 @@
 class Event:
-    
-    def __init__(self, name, date, duration = None, notes = None):
-        self.name = name
-        self.date = date
-        if duration: self.duration = duration
+
+    def __init__(self, name, time_string = None, duration_string = None, notes_string = None):
+        self.event_name = name
+        if time_string: self.start_time = self.process_time_string(time_string)
+        else: self.start_time = '12am'
+        if duration_string: self.duration = self.process_duration_string(duration_string)
         else: self.duration = 0
-        if notes: self.notes = notes
+        if notes_string: self.notes = self.process_notes_string(notes_string)
         else: self.notes = ''
 
         self.is_done = False
         self.synchronous = False
-        self.notes_taken = False
         self.recorded = False
-
-    def __init__(self, event_string):
-        self.event_string = event_string
-        self.process_event_string()
+        self.notes_taken = False
 
     def __str__(self):
         return "{name} ({duration}) [{notes}]".format(name=self.name,duration=self.duration,notes=self.notes)
     
-    def process_event_string(self):
+    def process_time_string(self, time_string):
+        pass
+    
+    def process_duration_string(self, duration_string):
+        pass
+
+    def process_notes_string(self, notes_string):
         pass
     
     def edit_name(self):
