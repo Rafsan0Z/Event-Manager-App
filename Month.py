@@ -14,21 +14,30 @@ class Month(DateList):
         self.max_days = date_dict[month_name.lower().strip()]
         super().__init__()
 
-    def __insert_pos(self, day):
-        self.check_day_type(day)
-        if not len(self): return 0
-        left_index = 0
-        right_index = len(self) - 1
-        mid_index = 0
-        while left_index <= right_index:
-            mid_index = math.floor((left_index + right_index) / 2)
-            mid_day = self[mid_index]
-            if mid_day.date_num < day.date_num:
-                left_index = mid_index + 1
-            elif mid_day.date_num > day.date:
-                right_index = mid_index - 1
-        return mid_index
+    # def __insert_pos(self, day):
+    #     self.check_day_type(day)
+    #     if not len(self): return 0
+    #     left_index = 0
+    #     right_index = len(self) - 1
+    #     mid_index = 0
+    #     while left_index <= right_index:
+    #         mid_index = math.floor((left_index + right_index) / 2)
+    #         mid_day = self[mid_index]
+    #         if mid_day.date_num < day.date_num:
+    #             left_index = mid_index + 1
+    #         elif mid_day.date_num > day.date:
+    #             right_index = mid_index - 1
+    #     return mid_index
     
+    def __insert_pos(self, date):
+        self.check_day_type(date)
+        index = 0
+        while index < len(self):
+            if self[index].date_num >= date.date_num:
+                break
+            index += 1
+        return index
+
     def __refactor_dates(self):
         # get the day for the first date of the month based on year
         # use that to calculate day names for each of the dates
@@ -51,7 +60,7 @@ class Month(DateList):
                 self.__refactor_dates()
 
         self.give_month_to_days(day)
-        self.insert(final_index, day)
+        self.days.insert(final_index, day)
 
     def give_month_to_days(self, day): 
         setattr(day, 'month_name', self.month)

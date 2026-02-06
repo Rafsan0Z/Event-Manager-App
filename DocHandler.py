@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
+from Event import Event
 from Date import Date
 from Month import Month
 from Year import Year
@@ -80,38 +81,43 @@ class DocHandler:
             extra_time_string = event_string[:event_string.index(':') + 1]
             time_string += extra_time_string
             event_string = event_string.replace(extra_time_string, '')
-        print(time_string[:-1])
-        return event_string
+        #print(time_string[:-1])
+        return time_string[:-1], event_string
 
     def process_subTab(self, subTab, month):
         test_string = ""
+        events_list = []
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']: # We are collecting events
                     event_string = line['paragraph']['elements'][0]['textRun']['content'].strip() #There should only be one
-                    print(event_string)
-                    event_string = self.extract_time_string(event_string)
+                    #print(event_string)
+                    time_string, event_string = self.extract_time_string(event_string)
                     note_string = ''
                     duration_string = ''
                     if '[' in event_string and ']' in event_string:
                         note_string = event_string[event_string.index("["):event_string.rindex("]") + 1]
                         event_string = event_string.replace(note_string, '')
                     if '(' in event_string and ')' in event_string:
-                        duration_string = event_string[event_string.index("("):event_string.rindex(")") + 1]
+                        duration_string = event_string[event_string.rindex("("):event_string.rindex(")") + 1]
                         event_string = event_string.replace(duration_string, '')
-                    print(note_string)
-                    print(duration_string[1:-1])
-                    print(event_string)
+                    #print(note_string)
+                    #print(duration_string[1:-1])
+                    #print(event_string)
+                    new_event = Event(event_string,time_string,duration_string[1:-1],note_string)
+                    new_date.append(new_event)
+                    events_list.append(new_event)
                 else: # We are now collecting days
                     text = line['paragraph']['elements'][0]['textRun']['content'].strip()
                     if text != '': 
                         month_string = text.split()[0]
                         date_string = text.split()[-1][:-2].strip()
-                        print(month_string, date_string)
+                        #print(month_string, date_string)
                         new_date = Date(month_string, int(date_string))
+                        month.append(new_date)
                         #we add this date to the month
                 #break
-        return test_string
+        return month
 
 
 
@@ -139,7 +145,7 @@ class DocHandler:
                     #self.dump_json("test.json", subTab['documentTab']['body']['content'])
                 database.add_year(new_year)
             
-            #print(database)
+            print(database)
         except HttpError as h:
             print(h)
 

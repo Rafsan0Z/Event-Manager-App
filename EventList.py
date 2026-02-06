@@ -51,4 +51,5 @@ class EventList(MutableSequence):
         event_index = 0
         for event in self.events:
             result += str(event_index + 1) + ". " + str(event) + '\n'
+            event_index += 1
         return result

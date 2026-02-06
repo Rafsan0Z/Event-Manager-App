@@ -31,7 +31,7 @@ class Date(Day):
         super().__init__(day_name)
 
     def __str__(self):
-        without_top_line = " ".join(super().__str__().split('\n')[1:])
+        without_top_line = "\n".join(super().__str__().split('\n')[1:])
         new_top_line = "{day} {date}\n".format(
             day = self.day_name,
             date = self.date_num
