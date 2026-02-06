@@ -1,6 +1,17 @@
 from abc import ABC, abstractmethod
 from EventExceptions import test_month, is_day, BadMonthException
+from DBHandler import DBFactory
 import click
+
+def start():
+    #Open a database connection here
+    database = DBFactory()
+    setattr(Screen, 'database', database)
+    screen = MainScreen
+    while screen:
+        screen.clear_screen()
+        screen = screen.main()
+    #Close that database connection here
 
 class Screen(ABC):
 
@@ -55,10 +66,9 @@ class ViewAllEventsScreen(Screen):
     def main(cls):
         print("This is the class method for the view events screen")
         print("Enter value to view filtered events. Only press enter if not to filter by that value, leave all filters blank to view all events")
-        year = input("Year: ")
-        month = input("Month: ")
-        day = input("Day: ")
-        return MainScreen
+        cls.database.grab_events()
+        back = input("Enter anything to return")
+        return ViewEventsScreen     
 
 class ViewEventsScreen(Screen):
     
@@ -168,12 +178,4 @@ class UpcomingEventsScreen(Screen):
 # for screen in screens:
 #     screen.main()
 
-def start():
-    #Open a database connection here
-    screen = MainScreen
-    while screen:
-        screen.clear_screen()
-        screen = screen.main()
-    #Close that database connection here
-
-start()
+#start()

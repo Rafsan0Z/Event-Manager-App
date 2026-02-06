@@ -38,6 +38,8 @@ class DocHandler:
         load_dotenv()
         self.creds = None
         self.validate()
+        self.test_doc()
+        self.flush_to_database()
         DocHandler.num += 1
 
     def __del__(self):
@@ -144,8 +146,8 @@ class DocHandler:
             print(h)
 
 
-test = DocFactory()
-test.test_doc()
+#test = DocFactory()
+#test.test_doc()
 #print(test.test_doc())
-print(test.database)
-test.flush_to_database()
+#print(test.database)
+#test.flush_to_database()

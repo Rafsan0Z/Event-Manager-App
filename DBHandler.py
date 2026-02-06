@@ -29,7 +29,6 @@ class DBHandler:
 
     def read_from_database(self):
         with shelve.open("Event_DB") as db:
-            #print(db['YearList'])
             self.year_list = db['YearList']
         db.close()
     
@@ -51,6 +50,6 @@ class DBHandler:
                         #print the event here
                         print(event)
 
-test = DBFactory()
+#test = DBFactory()
 #print(test.year_list)
-test.grab_events(2026,'February', 'Wednesday')
+#test.grab_events(2026,'February', 'Wednesday')

@@ -1,22 +1,14 @@
-from YearList import YearList
-from Year import Year
-from Month import Month
-from Date import Date
-from Event import Event
+from Screens import start
 from DocHandler import DocFactory
+from DBHandler import DBFactory
 
 class Main:
 
     def __init__(self):
         self.handler = DocFactory()
+        start()
 
     def grab_events():
-        pass
-
-    def flush_events():
-        pass
-
-    def process_duration():
         pass
 
     def upcoming_event():
@@ -71,3 +63,4 @@ class Main:
     def total_time():
         pass
 
+test = Main()
