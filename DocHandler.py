@@ -43,9 +43,10 @@ class DocHandler:
     def __del__(self):
         DocHandler.num -= 1
 
-    def flush_to_database(yearlist):
+    def flush_to_database(self):
         with shelve.open("Event_DB") as db:
-            db['YearList'] = yearlist
+            db['YearList'] = self.database
+        db.close()
 
     def validate(self):
         self.SCOPES = [os.getenv('DRIVE_SCOPE'), os.getenv('DOC_SCOPE')]
@@ -117,7 +118,6 @@ class DocHandler:
                         month.append(new_date)
                         #we add this date to the month
                 #break
-        return month
 
 
 
@@ -128,27 +128,24 @@ class DocHandler:
             document = self.service.documents().get(
                 documentId=os.getenv("TEST_FILE_ID"),
                 includeTabsContent=True
-            ).execute()
-            #print("Lets test this, here is the title: {title}".format(title=document.get('title')))
-            
+            ).execute()            
             database = YearList()
 
             for tab in document['tabs'][1:]:
-                #print(tab['tabProperties']['title'])
                 new_year = Year(int(tab['tabProperties']['title']))
-                    #print("These have subtabs")
                 for subTab in tab.get('childTabs', []):
-                    #print(subTab['tabProperties']['title'])
                     new_month = Month(subTab['tabProperties']['title'])
-                    new_year.add_month(new_month)
+                    new_year.append(new_month) #new_year.add_month(new_month)
                     self.process_subTab(subTab, new_month)
-                    #self.dump_json("test.json", subTab['documentTab']['body']['content'])
-                database.add_year(new_year)
+                database.append(new_year) #database.add_year(new_year)
             
-            print(database)
+            self.database = database
         except HttpError as h:
             print(h)
 
 
 test = DocFactory()
 test.test_doc()
+#print(test.test_doc())
+print(test.database)
+test.flush_to_database()

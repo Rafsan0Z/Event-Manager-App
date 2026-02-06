@@ -24,12 +24,14 @@ class DBHandler:
         DBHandler.num += 1
 
     def __del__(self):
-        self.flush_to_database()
+        #self.flush_to_database()
         DBHandler.num -= 1
 
     def read_from_database(self):
-        with shelve.open("Event_DB", 'r') as db:
+        with shelve.open("Event_DB") as db:
+            #print(db['YearList'])
             self.year_list = db['YearList']
+        db.close()
     
     def flush_to_database(self):
         with shelve.open("Event_DB") as db:
@@ -46,3 +48,6 @@ class DBHandler:
                         #print the event here
                         pass
     
+
+test = DBFactory()
+print(test.year_list)

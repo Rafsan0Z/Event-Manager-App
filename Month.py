@@ -12,7 +12,21 @@ class Month(DateList):
     def __init__(self, month_name):
         self.month = month_name
         self.max_days = date_dict[month_name.lower().strip()]
-        super().__init__()
+        if not hasattr(self, 'days'):
+            super().__init__()
+
+    def __reduce__(self):
+        return (Month, (self.month,), self.__getstate__())
+    
+    def __getstate__(self):
+        return {
+            #'month_name': self.month,
+            'days': self.days
+        }
+    
+    def __setstate__(self, state):
+        #self.month = state['month_name']
+        self.days = state['days']
 
     # def __insert_pos(self, day):
     #     self.check_day_type(day)

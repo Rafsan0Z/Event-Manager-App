@@ -83,8 +83,8 @@ class Event:
         self.host = host
 
 
-test = Event('test', time_string='4pm', duration_string='', notes_string='')
+#test = Event('test', time_string='4pm', duration_string='', notes_string='')
 #test.edit_duration_string('1 hour and 1 min')
 #print(test.duration)
 #print(test.notes)
-print(test)
+#print(test)
