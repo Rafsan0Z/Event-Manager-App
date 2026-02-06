@@ -9,6 +9,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
+from Day import Date
 from Month import Month
 from Year import Year
 from YearList import YearList
@@ -82,12 +83,11 @@ class DocHandler:
         print(time_string[:-1])
         return event_string
 
-    def process_subTab(self, subTab):
+    def process_subTab(self, subTab, month):
         test_string = ""
-        new_month = Month(subTab['tabProperties']['title'])
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
-                if 'bullet' in line['paragraph']:
+                if 'bullet' in line['paragraph']: # We are collecting events
                     event_string = line['paragraph']['elements'][0]['textRun']['content'].strip() #There should only be one
                     print(event_string)
                     event_string = self.extract_time_string(event_string)
@@ -102,9 +102,15 @@ class DocHandler:
                     print(note_string)
                     print(duration_string[1:-1])
                     print(event_string)
-                else:
-                    month_string = line['paragraph']['elements'][0]['textRun']['content'].strip()
-                    print(month_string)
+                else: # We are now collecting days
+                    text = line['paragraph']['elements'][0]['textRun']['content'].strip()
+                    if text != '': 
+                        month_string = text.split()[0]
+                        date_string = text.split()[-1][:-2].strip()
+                        print(month_string, date_string)
+                        new_date = Date(month_string, int(date_string))
+                        #we add this date to the month
+                #break
         return test_string
 
 
@@ -117,24 +123,24 @@ class DocHandler:
                 documentId=os.getenv("TEST_FILE_ID"),
                 includeTabsContent=True
             ).execute()
-            print("Lets test this, here is the title: {title}".format(title=document.get('title')))
+            #print("Lets test this, here is the title: {title}".format(title=document.get('title')))
             
             database = YearList()
 
             for tab in document['tabs'][1:]:
-                print(tab['tabProperties']['title'])
+                #print(tab['tabProperties']['title'])
                 new_year = Year(int(tab['tabProperties']['title']))
                 if len(tab.get('childTabs', [])) > 0:
-                    print("These have subtabs")
+                    #print("These have subtabs")
                     for subTab in tab['childTabs']:
-                        print(subTab['tabProperties']['title'])
+                        #print(subTab['tabProperties']['title'])
                         new_month = Month(subTab['tabProperties']['title'])
                         new_year.add_month(new_month)
-                        #self.process_subTab(subTab)
+                        self.process_subTab(subTab, new_month)
                         #self.dump_json("test.json", subTab['documentTab']['body']['content'])
                 database.add_year(new_year)
             
-            print(database)
+            #print(database)
         except HttpError as h:
             print(h)
 
