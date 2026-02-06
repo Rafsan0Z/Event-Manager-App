@@ -126,8 +126,62 @@ class AddEventsScreen(Screen):
     pass
 
 class PlotEventsScreen(Screen):
-    pass
     
+    @classmethod
+    def print_options(cls):
+        print("Choose one of the following optipns:")
+        print("(1) Plot Events by Year")
+        print("(2) Plot Events by Month")
+        print("(3) Plot Events by Date")
+        print("(b) Back to Main Screen")
+        print("Anything else will refresh the screen")
+
+    @classmethod
+    def process_output(cls):
+        output = input('Enter a choice: ').strip().lower()
+        match output:
+            case '1':
+                return PlotEventsByYearScreen
+            case '2':
+                return PlotEventsByMonthScreen
+            case '3':
+                return PlotEventsByDateScreen
+            case 'b':
+                return MainScreen
+            case _:
+                return PlotEventsScreen
+
+
+    @classmethod
+    def main(cls):
+        cls.print_options()
+        return cls.process_output()
+
+        
+class PlotEventsByMonthScreen(Screen):
+    
+    @classmethod
+    def main(cls):
+        cls.database.plot_events_month()
+        input("Press anything to go back\n")
+        return PlotEventsScreen
+
+class PlotEventsByDateScreen(Screen):
+    
+    @classmethod
+    def main(cls):
+        cls.database.plot_events_date()
+        input("Press anything to go back\n")
+        return PlotEventsScreen
+
+class PlotEventsByYearScreen(Screen):
+    
+    @classmethod
+    def main(cls):
+        cls.database.plot_events_year()
+        input("Press anything to go back")
+        return PlotEventsScreen
+
 class EditEventsScreen(Screen):
 
     @classmethod

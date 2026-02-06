@@ -1,4 +1,7 @@
 import shelve
+import matplotlib.pyplot as plt
+import numpy as np
+from EventExceptions import month_list
 
 def DBFactory():
     try:
@@ -49,6 +52,60 @@ class DBHandler:
                     for event in date:
                         #print the event here
                         print(event)
+
+    def plot_events_date(self):
+        xlist = []
+        ylist = []
+        for year in self.year_list:
+            for month in year:
+                for date in month:
+                    date_string = str(date.date_num) + '/' + str(month_list.index(month.month.lower())) + '/' + str(year.number)[-2:]
+                    xlist.append(date_string)
+                    ylist.append(date.num_events())
+        
+        plt.figure(figsize=(len(xlist), 6))
+        plt.xticks(rotation=45,ha='right')
+        graph = plt.barh(xlist, ylist)
+        plt.bar_label(graph)
+        plt.ylim(0, max(ylist) * 1.2)
+        plt.xlabel('Dates')
+        plt.ylabel('# of Events')
+        plt.title('Event Plot')
+        plt.show()
+
+    def plot_events_year(self):
+        xlist = []
+        ylist = []
+        for year in self.year_list:
+            xlist.append(str(year.number))
+            ylist.append(year.num_events())
+        xrange = np.array(xlist)
+        yrange = np.array(ylist)
+        graph = plt.bar(xlist, ylist)
+        plt.bar_label(graph)
+        plt.ylim(0,max(ylist) * 1.2)
+        plt.xlabel('Years')
+        plt.ylabel('# of Events')
+        plt.title('Event Plot')
+        plt.show()
+
+    def plot_events_month(self):
+        xlist = []
+        ylist = []
+        for year in self.year_list:
+            for month in year:
+                xlist.append(month.month[:3] + str(year.number)[-2:])
+                ylist.append(month.num_events())
+        xrange = np.array(xlist)
+        yrange = np.array(ylist)
+        #plt.plot(xrange, yrange)
+        graph = plt.bar(xlist, ylist)
+        plt.bar_label(graph)
+        plt.ylim(0,max(ylist) * 1.2)
+        plt.xlabel('Months')
+        plt.ylabel('# of Events')
+        plt.title('Event Plot')
+        plt.show()
 
 #test = DBFactory()
 #print(test.year_list)

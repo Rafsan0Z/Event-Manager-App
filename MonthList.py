@@ -50,6 +50,13 @@ class MonthList(MutableSequence):
             result += str(month)
         return result
     
+    def num_events(self):
+        count = 0
+        for month in self.months:
+            count += month.num_events()
+        return count
+
+    
     def search_months(self, month_name = None):
         if not month_name: return self
         filtered = []
