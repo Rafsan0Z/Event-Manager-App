@@ -70,6 +70,16 @@ class DocHandler:
         with open(name, 'a') as input:
             json.dump(entry,input,indent=4)
     
+    def extract_time_string(self, event_string):
+        time_string = event_string[:event_string.index(':') + 1]
+        event_string = event_string.replace(time_string, '')
+        if event_string[0] != ' ':
+            extra_time_string = event_string[:event_string.index(':') + 1]
+            time_string += extra_time_string
+            event_string = event_string.replace(extra_time_string, '')
+        print(time_string[:-1])
+        return event_string
+
     def process_subTab(self, subTab):
         test_string = ""
         new_month = Month(subTab['tabProperties']['title'])
@@ -78,11 +88,18 @@ class DocHandler:
                 if 'bullet' in line['paragraph']:
                     event_string = line['paragraph']['elements'][0]['textRun']['content'].strip() #There should only be one
                     print(event_string)
-                    time_string = event_string[:event_string.index(':')]
+                    event_string = self.extract_time_string(event_string)
                     note_string = ''
+                    duration_string = ''
                     if '[' in event_string and ']' in event_string:
-                        note_string = event_string[event_string.index("[") + 1:event_string.rindex("]")]
+                        note_string = event_string[event_string.index("["):event_string.rindex("]") + 1]
+                        event_string = event_string.replace(note_string, '')
+                    if '(' in event_string and ')' in event_string:
+                        duration_string = event_string[event_string.index("("):event_string.rindex(")") + 1]
+                        event_string = event_string.replace(duration_string, '')
                     print(note_string)
+                    print(duration_string)
+                    print(event_string)
                 else:
                     month_string = line['paragraph']['elements'][0]['textRun']['content'].strip()
                     print(month_string)

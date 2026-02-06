@@ -1,13 +1,18 @@
+from datetime import timedelta as dur
+
 class Event:
 
-    def __init__(self, name, time_string = None, duration_string = None, notes_string = None):
+    def __init__(self, name, time_string = '', duration_string = '', notes_string = ''):
         self.event_name = name
-        if time_string: self.start_time = self.process_time_string(time_string)
-        else: self.start_time = '12am'
-        if duration_string: self.duration = self.process_duration_string(duration_string)
-        else: self.duration = 0
-        if notes_string: self.notes = self.process_notes_string(notes_string)
-        else: self.notes = ''
+
+        self.time_string = time_string
+        self.process_time_string()
+
+        self.duration_string = duration_string
+        self.process_duration_string()
+
+        self.notes_string = notes_string
+        self.process_notes_string()
 
         self.is_done = False
         self.synchronous = False
@@ -15,22 +20,54 @@ class Event:
         self.notes_taken = False
 
     def __str__(self):
-        return "{name} ({duration}) [{notes}]".format(name=self.name,duration=self.duration,notes=self.notes)
+        duration_print = '' if not self.duration_string else ' for ' + self.duration_string
+        event_line = "At {time}, {name}{duration}. Notes: \n".format(
+            time = self.time_string,
+            name = self.event_name,
+            duration = duration_print,
+        )
+        if not len(self.notes):
+            return event_line + "Nothing at this time\n"
+        notes_lines = ''
+        for note in self.notes:
+            notes_lines += '(*) ' + note + '\n'
+        return event_line + notes_lines
     
-    def process_time_string(self, time_string):
-        pass
+    def process_time_string(self):
+        return 
     
-    def process_duration_string(self, duration_string):
-        pass
+    def process_duration_string(self):
+        hours = 0
+        mins = 0
 
-    def process_notes_string(self, notes_string):
-        pass
-    
-    def edit_name(self):
-        pass
+        duration_block = self.duration_string.split()
+        if 'hour' in duration_block or 'hours' in duration_block:
+            hours = int(duration_block[0].strip())
+        if 'min' in duration_block or 'mins' in duration_block:
+            mins = int(duration_block[-2].strip())
+        
+        self.duration = dur(hours=hours, minutes=mins)
 
-    def edit_duration(self):
-        pass
+    def process_notes_string(self):
+        self.notes = []
+        note_block = self.notes_string.split('and')
+        last_note = note_block[-1].strip()
+        other_notes = " ".join(note_block[:-1])
+        for each in other_notes.split(','):
+            if each.strip():
+                self.notes.append(each.strip())
+        if last_note: self.notes.append(last_note)
+
+    
+    def edit_duration_string(self, string):
+        self.duration_string = string
+        self.process_duration_string()
+
+    def edit_name(self, name):
+        self.name = name
+
+    def edit_duration(self, hours = 0, mins = 0):
+        self.duration = dur(hours=hours, minutes=mins)
 
     def add_notes(self):
         pass
@@ -46,3 +83,10 @@ class Event:
 
     def set_host(self, host):
         self.host = host
+
+
+test = Event('test', time_string='4pm', duration_string='', notes_string='')
+#test.edit_duration_string('1 hour and 1 min')
+#print(test.duration)
+#print(test.notes)
+print(test)

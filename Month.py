@@ -39,7 +39,11 @@ class Month(DayList):
             print("The index you provided is not correct, but we've inserted the day in the correct position")
         if self.year_num:
             test_day(day.day_name, self.month, self.year_num, day.date_num)
+        self.give_month_to_days(day)
         self.insert(final_index, day)
+
+    def give_month_to_days(self, day): 
+        setattr(day, 'month_name', self.month)
 
     def __str__(self):
         result = "For {month}: \n".format(month = self.month)

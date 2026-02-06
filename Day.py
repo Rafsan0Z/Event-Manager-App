@@ -4,7 +4,7 @@ from EventExceptions import is_day, NotAnEventException
 class Day(EventList):
     
     def __new__(cls, *args, **kwargs):
-        is_day(args[1])
+        is_day(args[0])
         #test_day(args[1],args[0],args[3],args[2])
         return super().__new__(cls)
 
@@ -22,6 +22,10 @@ class Day(EventList):
 
 class Date(Day):
 
+    def __new__(cls, *args):
+        assert args[-1] <= 31, "Date number is too high"
+        return super().__new__(cls, args[0])
+
     def __init__(self, day_name, date_num):
         self.date_num = date_num
         super().__init__(day_name)
@@ -38,3 +42,4 @@ class Date(Day):
 #test = Day('January',"Saturday",31,2026)
 #print(test)
 # test.add_event("I promise is this an event")
+#test = Date("Wednesday", 40)
