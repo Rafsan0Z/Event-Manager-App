@@ -130,14 +130,13 @@ class DocHandler:
             for tab in document['tabs'][1:]:
                 #print(tab['tabProperties']['title'])
                 new_year = Year(int(tab['tabProperties']['title']))
-                if len(tab.get('childTabs', [])) > 0:
                     #print("These have subtabs")
-                    for subTab in tab['childTabs']:
-                        #print(subTab['tabProperties']['title'])
-                        new_month = Month(subTab['tabProperties']['title'])
-                        new_year.add_month(new_month)
-                        self.process_subTab(subTab, new_month)
-                        #self.dump_json("test.json", subTab['documentTab']['body']['content'])
+                for subTab in tab.get('childTabs', []):
+                    #print(subTab['tabProperties']['title'])
+                    new_month = Month(subTab['tabProperties']['title'])
+                    new_year.add_month(new_month)
+                    self.process_subTab(subTab, new_month)
+                    #self.dump_json("test.json", subTab['documentTab']['body']['content'])
                 database.add_year(new_year)
             
             #print(database)

@@ -40,9 +40,9 @@ class DBHandler:
             #print the year num here
             for month in year.search_months(month_name):
                 #print the month here
-                for day in month.search_days(day_name):
+                for date in month.search_days(day_name):
                     #print the day (and date number) here
-                    for event in day:
+                    for event in date:
                         #print the event here
                         pass
     

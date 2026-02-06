@@ -1,8 +1,8 @@
-from DayList import DayList
-from EventExceptions import test_month, test_day, date_dict
+from DateList import DateList
+from EventExceptions import test_month, test_day, date_dict, WrongDateException
 import math
 
-class Month(DayList):
+class Month(DateList):
     
     def __new__(cls, month_name):
         test_month(month_name)
@@ -28,9 +28,16 @@ class Month(DayList):
             elif mid_day.date_num > day.date:
                 right_index = mid_index - 1
         return mid_index
+    
+    def __refactor_dates(self):
+        # get the day for the first date of the month based on year
+        # use that to calculate day names for each of the dates
+        # rename the dates
+        # everything else remains untouched
+        pass
 
     def __setitem__(self, i, day):
-        raise Exception("Month object can't have days set to it, only inserted and appended!")
+        raise Exception("Month object can't have dates set to it, only inserted and appended!")
 
     def insert(self, i, day):
         assert len(self) <= self.max_days, "The month is already full"
@@ -38,7 +45,11 @@ class Month(DayList):
         if final_index != i and i != len(self):
             print("The index you provided is not correct, but we've inserted the day in the correct position")
         if self.year_num:
-            test_day(day.day_name, self.month, self.year_num, day.date_num)
+            try:
+                test_day(day.day_name, self.month, self.year_num, day.date_num)
+            except WrongDateException as w:
+                self.__refactor_dates()
+
         self.give_month_to_days(day)
         self.insert(final_index, day)
 
