@@ -12,7 +12,7 @@ class Event:
         self.process_duration_string()
 
         self.notes_string = notes_string
-        self.process_notes_string()
+        self.__process_notes_string()
 
         self.is_done = False
         self.synchronous = False
@@ -48,7 +48,7 @@ class Event:
         
         self.duration = dur(hours=hours, minutes=mins)
 
-    def process_notes_string(self):
+    def __process_notes_string(self):
         self.notes = []
         note_block = self.notes_string.split('and')
         last_note = note_block[-1].strip()
@@ -69,17 +69,15 @@ class Event:
     def edit_duration(self, hours = 0, mins = 0):
         self.duration = dur(hours=hours, minutes=mins)
 
-    def add_notes(self):
-        pass
+    def add_notes(self, extra_notes):
+        for note in extra_notes.strip().split(','):
+            if note: self.notes.append(note)
 
     def delete_notes(self):
-        self.notes = ''
+        self.notes = []
 
-    def edit_time(self):
-        pass
-
-    def edit_date(self):
-        pass
+    def edit_time(self, time_string):
+        self.process_time_string(time_string)
 
     def set_host(self, host):
         self.host = host

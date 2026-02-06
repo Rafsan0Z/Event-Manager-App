@@ -13,7 +13,7 @@ class YearList(MutableSequence):
         return self.years[i]
 
     def check_year_type(self, year_candidate):
-        if isinstance(year_candidate, Year):
+        if not isinstance(year_candidate, Year):
             raise NotAnYearException(year_candidate)
     
     def __setitem__(self, i, year):

@@ -28,9 +28,14 @@ class MonthList(MutableSequence):
         self.check_month_item(month)
         self.months.insert(i, month)
 
-    def add_month(self, month_string):
-        new_month = Month(month_string)
-        self.append(new_month)
+    def add_month(self, month_candidate):
+        if isinstance(month_candidate, str):
+            new_month = Month(month_candidate)
+            self.append(new_month)
+        elif isinstance(month_candidate, Month):
+            self.append(month_candidate)
+        else:
+            raise NotAMonthException(month_candidate)
 
     def give_months(self):
         for month in self.months:
