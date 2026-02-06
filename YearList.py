@@ -41,6 +41,6 @@ class YearList(MutableSequence):
         if not year_num: return self
         filtered = []
         for year in self.years:
-            if year.year_num == year_num: filtered.append(year)
+            if year.number == year_num: filtered.append(year)
         return filtered
 

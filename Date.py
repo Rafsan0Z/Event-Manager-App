@@ -10,7 +10,7 @@ class Day(EventList):
 
     def __init__(self, day_name):
         self.day_name = day_name
-        super().__init__()
+        if not hasattr(self, 'events'): super().__init__()
 
     def __str__(self):
         result = "{day} \n".format(
@@ -25,6 +25,21 @@ class Date(Day):
     def __new__(cls, *args):
         assert args[-1] <= 31, "Date number is too high"
         return super().__new__(cls, args[0])
+    
+    def __reduce__(self):
+        return (Date, (self.day_name, self.date_num,), self.__getstate__())
+    
+    def __getstate__(self):
+        return {
+            'day_name': self.day_name,
+            'date_num': self.date_num,
+            'events': self.events
+        }  
+    
+    def __setstate__(self, state):
+        self.day_name = state['day_name']
+        self.date_num = state['date_num']
+        self.events = state['events']
 
     def __init__(self, day_name, date_num):
         self.date_num = date_num

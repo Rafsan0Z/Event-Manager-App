@@ -40,14 +40,17 @@ class DBHandler:
     def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None):
         for year in self.year_list.search_years(year_num):
             #print the year num here
+            #print(year.number)
             for month in year.search_months(month_name):
                 #print the month here
+                #print(month.month)
                 for date in month.search_days(day_name):
                     #print the day (and date number) here
+                    #print(date.day_name, date.date_num)
                     for event in date:
                         #print the event here
-                        pass
-    
+                        print(event)
 
 test = DBFactory()
-print(test.year_list)
+#print(test.year_list)
+test.grab_events(2026,'February', 'Wednesday')
