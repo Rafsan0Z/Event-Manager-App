@@ -1,7 +1,8 @@
 import shelve
 import matplotlib.pyplot as plt
 import numpy as np
-from EventExceptions import month_list
+from EventExceptions import month_list, date_dict, days_list
+from datetime import datetime
 
 def DBFactory():
     try:
@@ -40,18 +41,57 @@ class DBHandler:
             db['YearList'] = self.year_list
 
     def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None):
+        # new_list = YearList()
         for year in self.year_list.search_years(year_num):
             #print the year num here
             #print(year.number)
+            # new_list.add_year(year)
             for month in year.search_months(month_name):
                 #print the month here
                 #print(month.month)
-                for date in month.search_days(day_name):
+                for date in month.search_dates(day_name, date_num):
                     #print the day (and date number) here
                     #print(date.day_name, date.date_num)
                     for event in date:
                         #print the event here
                         print(event)
+
+    def yesterdays_events(self):
+        yesterday_year = datetime.now().year
+        today_month = month_list[datetime.now().month - 1].lower().strip()
+        today_date = datetime.now().day
+        if today_date - 1 < 1:
+            yesterday_month = month_list[datetime.now().month - 1]
+            if datetime.now().month - 1 < 0: yesterday_year -= 1
+            yesterday_date = date_dict[yesterday_month]
+        else:
+            yesterday_month = today_month
+            yesterday_date = today_date - 1
+        yesterday_day = days_list[days_list.index(datetime.now().strftime('%A').lower().strip()) - 1]
+        self.grab_events(yesterday_year, yesterday_month, yesterday_day, yesterday_date)
+
+
+    def todays_events(self):
+        today_year = datetime.now().year
+        today_month = month_list[datetime.now().month - 1]
+        today_day = datetime.now().strftime('%A').strip()
+        today_date = datetime.now().day
+        self.grab_events(today_year, today_month, today_day, today_date)
+    
+    def tomorrows_events(self):
+        tomorrow_year = datetime.now().year
+        today_month = month_list[datetime.now().month - 1].lower().strip()
+        today_date = datetime.now().day
+        if today_date + 1 > date_dict[today_month]:
+            tomorrow_month = month_list[datetime.now().month % 12]
+            tomorrow_date = 1
+        else:
+            tomorrow_month = today_month
+            tomorrow_date = today_date + 1
+        tomorrow_day = days_list[(days_list.index(datetime.now().strftime('%A').lower().strip()) + 1) % 7]
+        self.grab_events(tomorrow_year, tomorrow_month, tomorrow_day, tomorrow_date)
+
+
 
     def plot_events_date(self):
         xlist = []

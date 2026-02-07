@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from EventExceptions import test_month, is_day, BadMonthException
+from EventExceptions import test_month, is_day, month_list, BadMonthException
 from DBHandler import DBFactory
+from datetime import datetime
 import click
 
 def start():
@@ -128,6 +129,9 @@ class YesterdaysEventScreen(Screen):
     @classmethod
     def main(cls):
         print("Displaying Yesterdays Events:")
+        cls.database.yesterdays_events()
+        input("Press anything to return\n")
+        return ViewEventsScreen
 
 
 class TodaysEventsScreen(Screen):
@@ -135,10 +139,19 @@ class TodaysEventsScreen(Screen):
     @classmethod
     def main(cls):
         print("Displaying Todays Events:")
+        cls.database.todays_events()
+        input("Press anything to return\n")
+        return ViewEventsScreen
 
 
 class TomorrowsEventsScreen(Screen):
-    pass
+    
+    @classmethod
+    def main(cls):
+        print("Displaying Tomorrows Events: ")
+        cls.database.tomorrows_events()
+        input("Press anything to return\n")
+        return ViewEventsScreen
 
 class ViewFilteredEventsScreen(Screen):
     
@@ -154,6 +167,9 @@ class ViewFilteredEventsScreen(Screen):
         if options.get('day', None):
             result += 'On ' + options.get('day') + "|"
         else: result += "Any Day|"
+        if options.get('date', None):
+            result += 'On ' + options.get('date') + "|"
+        else: result += "Any Date|"
         print(result)
 
     @classmethod
@@ -175,9 +191,11 @@ class ViewFilteredEventsScreen(Screen):
         year = cls.process_time_item("Year")
         month = cls.process_time_item('Month', test_month)
         day = cls.process_time_item('Day', is_day)
-        cls.filter_message(year=year,month=month,day=day)
+        date = cls.process_time_item('Date')
+        cls.filter_message(year=year,month=month,day=day,date=date)
         if year: year = int(year)
-        cls.database.grab_events(year,month,day)
+        if date: date = int(date)
+        cls.database.grab_events(year,month,day,date)
         input("Press something to return: ")
         return ViewEventsScreen
 

@@ -67,11 +67,15 @@ class DateList(MutableSequence):
     def __iter__(self):
         return self.give_days()
     
-    def search_days(self, day_name = None):
-        if not day_name: return self
+    def search_dates(self, day_name = None, date_num = None):
+        if not day_name and not date_num: return self
         filtered = []
         for day in self.days:
-            if day.day_name.lower() == day_name: filtered.append(day)
+            if day_name and day.day_name.lower() == day_name:
+                if date_num and day.date_num != date_num: continue                
+                filtered.append(day)
+            elif date_num and day.date_num == date_num:
+                filtered.append(day)
         return filtered
     
 # test = DateList()
