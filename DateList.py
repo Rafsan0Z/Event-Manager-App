@@ -71,7 +71,7 @@ class DateList(MutableSequence):
         if not day_name: return self
         filtered = []
         for day in self.days:
-            if day.day_name == day_name: filtered.append(day)
+            if day.day_name.lower() == day_name: filtered.append(day)
         return filtered
     
 # test = DateList()

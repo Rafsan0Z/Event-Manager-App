@@ -61,5 +61,5 @@ class MonthList(MutableSequence):
         if not month_name: return self
         filtered = []
         for month in self.months:
-            if month.month == month_name: filtered.append(month)
+            if month.month.lower() == month_name: filtered.append(month)
         return filtered

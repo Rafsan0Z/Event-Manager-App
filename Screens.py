@@ -33,6 +33,7 @@ class MainScreen(Screen):
         print("(2) Edit Events")
         print("(3) Add Events")
         print("(4) Plot Events")
+        print("(5) Info")
         print("(Q) Exit")
         print(" Anything else will refresh the screen ")
     
@@ -47,6 +48,8 @@ class MainScreen(Screen):
                 return AddEventsScreen
             case '4':
                 return PlotEventsScreen
+            case '5':
+                return InfoScreen
             case 'q':
                 return None
             case _:
@@ -78,6 +81,7 @@ class ViewEventsScreen(Screen):
         print("(2) View Todays Events")
         print("(3) View Tomorrows Events")
         print("(4) View All Events")
+        print("(5) View Filtered Events")
         print("(b) Go Back to the Main Screen")
         print("Any other inputs will have no affect")
 
@@ -92,6 +96,8 @@ class ViewEventsScreen(Screen):
                 return TomorrowsEventsScreen
             case '4':
                 return ViewAllEventsScreen
+            case '5':
+                return ViewFilteredEventsScreen
             case 'b':
                 return MainScreen
             case _:
@@ -104,6 +110,18 @@ class ViewEventsScreen(Screen):
         output = input("Input: ").lower().strip()
         return cls.process_output(output) 
 
+
+class InfoScreen(Screen):
+
+    @classmethod
+    def main(cls):
+        print("Name of the Document: ")
+        print("Number of Years stored:", len(cls.database.year_list))
+        print("Number of months stored:", sum([len(year) for year in cls.database.year_list]))
+        print("Last modified time: ")
+        print("Github page: ")
+        input("Press anything to return\n")
+        return MainScreen
 
 class YesterdaysEventScreen(Screen):
     
@@ -121,6 +139,47 @@ class TodaysEventsScreen(Screen):
 
 class TomorrowsEventsScreen(Screen):
     pass
+
+class ViewFilteredEventsScreen(Screen):
+    
+    @classmethod
+    def filter_message(cls, **options):
+        result = "Displaying events based on: "
+        if options.get('year', None):
+            result += 'the Year ' + options.get('year') + "| "
+        else: result += 'Any Year| '
+        if options.get('month', None):
+            result += 'the month of ' + options.get('month') + "| "
+        else: result += 'Any Month| '
+        if options.get('day', None):
+            result += 'On ' + options.get('day') + "|"
+        else: result += "Any Day|"
+        print(result)
+
+    @classmethod
+    def process_time_item(cls, time_unit, test_func = None):
+        output = input(time_unit + ": ").lower().strip()
+        correct_input = False
+        while test_func and output != '' and not correct_input:
+            try:
+                test_func(output)
+            except Exception as e:
+                output = input("Input a correct " + time_unit + " or leave it blank!! " + time_unit + ": ").lower().strip()
+            else:
+                correct_input = True
+        return output if output else None
+
+    @classmethod
+    def main(cls):
+        print("Enter the filter values, leave a filter empty if you want all events under that fileter")
+        year = cls.process_time_item("Year")
+        month = cls.process_time_item('Month', test_month)
+        day = cls.process_time_item('Day', is_day)
+        cls.filter_message(year=year,month=month,day=day)
+        if year: year = int(year)
+        cls.database.grab_events(year,month,day)
+        input("Press something to return: ")
+        return ViewEventsScreen
 
 class AddEventsScreen(Screen):
     pass
