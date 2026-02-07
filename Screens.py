@@ -204,7 +204,35 @@ class ViewFilteredEventsScreen(Screen):
         return ViewEventsScreen
 
 class AddEventsScreen(Screen):
-    pass
+    
+    @classmethod
+    def main(cls):
+        final = ''
+
+        while final == '' or final == 'r':
+            cls.clear_screen()
+            event_name = input("First enter your Event name: ").strip()
+            time = input("Now enter when this event will take place: ").strip().lower()
+            day_name = input("Now enter the day name in full: ").strip()
+            date_num = input("Now enter the date (numbers only): ").strip()
+            month_name = input("Now enter the month name in full: ").strip()
+            year_num = input("Finally, enter the year (numbers only): ").strip()
+
+            print("You have entered an event with the following details: ")
+            print("Event Name: {event}".format(event=event_name))
+            print("Time: {time} on {day} the {date}, {month} {year}".format(
+                time = time,
+                day = day_name,
+                date = date_num,
+                month = month_name,
+                year = year_num
+            ))
+
+            final = input("If these details are correct press F to continue. Otherwise Press R to start again: ").lower().strip()
+        
+        input("Your event has been added! Press anything to return\n")
+        return MainScreen
+
 
 class PlotEventsScreen(Screen):
     
@@ -295,12 +323,23 @@ class EditEventsScreen(Screen):
 
     @classmethod
     def main(cls):
-        print("We'll edit the chosen event here, only one event can be edited at a time [for now!]")
-        print("Enter the filter values, leave a filter empty if you want all events under that fileter")
-        year = cls.process_time_item("Year")
-        month = cls.process_time_item('Month', test_month)
-        day = cls.process_time_item('Day', is_day)
-        cls.filter_message(year=year,month=month,day=day)
+        choice = ''
+
+        while choice == '' or choice == 'r':
+            print("We'll edit the chosen event here, only one event can be edited at a time [for now!]")
+            print("Enter the filter values, leave a filter empty if you want all events under that fileter")
+            year = cls.process_time_item("Year")
+            month = cls.process_time_item('Month', test_month)
+            day = cls.process_time_item('Day', is_day)
+            cls.filter_message(year=year,month=month,day=day)
+
+            choice = input("Now pick one of the following events by entering the number. Enter B to go back to the Main Screen. Enter anything else to reset your filters: ").lower().strip()
+            if choice == 'b': return MainScreen
+            elif choice.isdigit(): break
+            else : cls.clear_screen()
+        
+        input("Edit complete! Press anything to go back: ")
+        return MainScreen
 
 
 class UpcomingEventsScreen(Screen):
