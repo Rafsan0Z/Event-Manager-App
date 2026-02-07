@@ -83,8 +83,31 @@ class Event:
         self.host = host
 
 
-#test = Event('test', time_string='4pm', duration_string='', notes_string='')
-#test.edit_duration_string('1 hour and 1 min')
-#print(test.duration)
-#print(test.notes)
-#print(test)
+class DocumentedEvent(Event):
+
+    def add_start_index(self, index):
+        self.__start_index = index
+
+    def add_end_index(self, index):
+        self.__end_index = index
+
+    def enableEditToken(self):
+        self.__edit = True
+    
+    def disableEditToken(self):
+        self.__edit = False
+
+    def enableChangedToken(self):
+        self.__changed = True
+
+    def disableChangedToken(self):
+        self.__changed = False
+
+
+# Plan for the above mentioned class:
+# When an in app change has been made
+# Turn on the edit token when an edit is made
+# When the app is closing, check for this token, and flush those changes to the doc
+# The changed token is an optimization tool
+# So indices will not have to be re-loaded for tabs or subtabs 
+# After re-loading the indices the changed token will be set off
