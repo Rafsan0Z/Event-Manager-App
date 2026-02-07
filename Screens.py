@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from EventExceptions import test_month, is_day, month_list, BadMonthException
+from EventExceptions import test_month, is_day
 from DBHandler import DBFactory
-from datetime import datetime
+from dotenv import load_dotenv
+import os
 import click
 
 def start():
@@ -116,11 +117,14 @@ class InfoScreen(Screen):
 
     @classmethod
     def main(cls):
-        print("Name of the Document: ")
-        print("Number of Years stored:", len(cls.database.year_list))
-        print("Number of months stored:", sum([len(year) for year in cls.database.year_list]))
-        print("Last modified time: ")
-        print("Github page: ")
+        load_dotenv(override=True)
+        print("Name of the Document:", os.getenv('FILE_NAME'))
+        print("Number of Years:", len(cls.database.year_list))
+        print("Number of Months:", cls.database.year_list.num_months())
+        print("Number of Days:", cls.database.year_list.num_days())
+        print("Number of Events:", cls.database.year_list.num_events())
+        print("Last modified time:", os.getenv("LAST_MODIFIED"))
+        print("Github page:", os.getenv("GITHUB_URL"))
         input("Press anything to return\n")
         return MainScreen
 

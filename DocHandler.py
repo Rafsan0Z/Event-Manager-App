@@ -1,13 +1,14 @@
 import os.path
 import os
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv, set_key
 from pathlib import Path
 from Event import Event
 from Date import Date
@@ -40,6 +41,7 @@ class DocHandler:
         self.validate()
         self.test_doc()
         self.flush_to_database()
+        self.set_metadata()
         DocHandler.num += 1
 
     def __del__(self):
@@ -67,8 +69,21 @@ class DocHandler:
 
 
 
-    def last_modified(self):
-        pass
+    def set_metadata(self):
+        drive = build('drive', 'v3', credentials=self.creds)
+        metadata = drive.files().get(
+            fileId = os.getenv("TEST_FILE_ID"),
+            fields='name, modifiedTime'
+        ).execute()
+
+        unformatted_time = metadata.get('modifiedTime')
+        utc_time = datetime.fromisoformat(unformatted_time.replace('Z', '+00:00'))
+        est_zone = ZoneInfo(os.getenv('TIME_ZONE'))
+        est_time = utc_time.astimezone(est_zone)
+
+        env_path = find_dotenv()
+        set_key(env_path, "LAST_MODIFIED", est_time.strftime('%Y-%m-%d %I:%M %p'))
+        set_key(env_path, 'FILE_NAME', metadata.get('name'))
 
     def pull_doc(self):
         pass

@@ -43,4 +43,24 @@ class YearList(MutableSequence):
         for year in self.years:
             if year.number == year_num: filtered.append(year)
         return filtered
+    
+    def num_events(self):
+        count = 0
+        for year in self.years:
+            count += year.num_events()
+        return count
+    
+    def num_days(self):
+        count = 0
+        for year in self.years:
+            for month in year:
+                count += len(month)
+        return count
+    
+    def num_months(self):
+        count = 0
+        for year in self.years:
+            count += len(year)
+        return count
+
 
