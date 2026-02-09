@@ -91,7 +91,50 @@ class DBHandler:
         tomorrow_day = days_list[(days_list.index(datetime.now().strftime('%A').lower().strip()) + 1) % 7]
         self.grab_events(tomorrow_year, tomorrow_month, tomorrow_day, tomorrow_date)
 
+    def find_max_event_year(self):
+        max_count = 0
+        max_year = None
+        for year in self.year_list:
+            curr_year_count = year.num_events()
+            if curr_year_count > max_count:
+                max_count = curr_year_count
+                max_year = year
+        return max_year, max_count
 
+    def find_max_event_month(self):
+        max_count = 0
+        max_month = None
+        for year in self.year_list:
+            for month in year:
+                curr_month_count = month.num_events()
+                if curr_month_count > max_count:
+                    max_count = curr_month_count
+                    max_month = month
+        return max_month, max_count
+    
+    def find_max_event_date(self):
+        max_count = 0
+        max_date = None
+        for year in self.year_list:
+            for month in year:
+                for date in month:
+                    curr_date_count = date.num_events()
+                    if curr_date_count > max_count:
+                        max_count = curr_date_count
+                        max_date = date
+        return max_date, max_count                
+
+
+    def plot_events(self, tag = 'date'):
+        tag = tag.strip().lower()
+        match tag:
+            case 'date':
+                self.plot_events_date()
+            case 'month':
+                self.plot_events_month()
+            case 'year':
+                self.plot_events_year()
+        
 
     def plot_events_date(self):
         xlist = []

@@ -10,7 +10,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv, find_dotenv, set_key
 from pathlib import Path
-from Event import Event
+from Event import Event, DocumentedEvent
 from Date import Date
 from Month import Month
 from Year import Year
@@ -103,13 +103,11 @@ class DocHandler:
         return time_string[:-1], event_string
 
     def process_subTab(self, subTab, month):
-        test_string = ""
-        events_list = []
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']: # We are collecting events
-                    event_string = line['paragraph']['elements'][0]['textRun']['content'].strip() #There should only be one
-                    #print(event_string)
+                    element = line['paragraph']['elements'][0]
+                    event_string = element['textRun']['content'].strip() #There should only be one
                     time_string, event_string = self.extract_time_string(event_string)
                     note_string = ''
                     duration_string = ''
@@ -119,23 +117,19 @@ class DocHandler:
                     if '(' in event_string and ')' in event_string:
                         duration_string = event_string[event_string.rindex("("):event_string.rindex(")") + 1]
                         event_string = event_string.replace(duration_string, '')
-                    #print(note_string)
-                    #print(duration_string[1:-1])
-                    #print(event_string)
-                    new_event = Event(event_string,time_string,duration_string[1:-1],note_string)
-                    new_date.append(new_event)
-                    events_list.append(new_event)
+                    #new_event = Event(event_string,time_string,duration_string[1:-1],note_string)
+                    new_documented_event = DocumentedEvent(event_string,time_string,duration_string[1:-1],note_string)
+                    new_documented_event.add_start_index(element['startIndex'])
+                    new_documented_event.add_end_index(element['endIndex'])
+                    new_date.append(new_documented_event)
+                    #events_list.append(new_event)
                 else: # We are now collecting days
                     text = line['paragraph']['elements'][0]['textRun']['content'].strip()
                     if text != '': 
                         month_string = text.split()[0]
                         date_string = text.split()[-1][:-2].strip()
-                        #print(month_string, date_string)
                         new_date = Date(month_string, int(date_string))
                         month.append(new_date)
-                        #we add this date to the month
-                #break
-
 
 
 
@@ -153,6 +147,7 @@ class DocHandler:
                 for subTab in tab.get('childTabs', []):
                     new_month = Month(subTab['tabProperties']['title'])
                     new_year.append(new_month) #new_year.add_month(new_month)
+                    #print(new_month.year_num)
                     self.process_subTab(subTab, new_month)
                 database.append(new_year) #database.add_year(new_year)
             

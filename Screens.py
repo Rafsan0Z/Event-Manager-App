@@ -118,10 +118,29 @@ class InfoScreen(Screen):
     @classmethod
     def main(cls):
         load_dotenv(override=True)
+        max_year, max_year_count = cls.database.find_max_event_year()
+        max_month, max_month_count = cls.database.find_max_event_month()
+        max_date, max_date_count = cls.database.find_max_event_date()
         print("Name of the Document:", os.getenv('FILE_NAME'))
         print("Number of Years:", len(cls.database.year_list))
+        print("Year with the most events: {year} with {events} events".format(
+            year = max_year.number,
+            events = max_year_count
+        ))
         print("Number of Months:", cls.database.year_list.num_months())
+        print("Month with the most events: {month} of {year} with {events} events".format(
+            month = max_month.month,
+            year = max_month.year_num,
+            events = max_month_count
+        ))
         print("Number of Days:", cls.database.year_list.num_days())
+        print("Day with the most events: {day} the {date}, {month} of {year} with {events} events".format(
+            date = max_date.date_num,
+            day = max_date.day_name,
+            month = max_date.month_name,
+            year = max_date.year_num,
+            events = max_date_count
+        ))
         print("Number of Events:", cls.database.year_list.num_events())
         print("Last modified time:", os.getenv("LAST_MODIFIED"))
         print("Github page:", os.getenv("GITHUB_URL"))

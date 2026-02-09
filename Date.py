@@ -33,6 +33,8 @@ class Date(Day):
         return {
             'day_name': self.day_name,
             'date_num': self.date_num,
+            'month_name': self.month_name if self.month_name else None,
+            'year_num': self.year_num if self.year_num else None,
             'events': self.events
         }  
     
@@ -40,6 +42,8 @@ class Date(Day):
         self.day_name = state['day_name']
         self.date_num = state['date_num']
         self.events = state['events']
+        if state['month_name']: self.month_name = state['month_name']
+        if state['year_num']: self.year_num = state['year_num']
 
     def __init__(self, day_name, date_num):
         self.date_num = date_num

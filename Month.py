@@ -21,12 +21,14 @@ class Month(DateList):
     def __getstate__(self):
         return {
             #'month_name': self.month,
-            'days': self.days
+            'days': self.days,
+            'year_num': self.year_num if self.year_num else None
         }
     
     def __setstate__(self, state):
         #self.month = state['month_name']
         self.days = state['days']
+        if state['year_num']: self.year_num = state['year_num']
 
     # def __insert_pos(self, day):
     #     self.check_day_type(day)
@@ -78,6 +80,8 @@ class Month(DateList):
 
     def give_month_to_days(self, day): 
         setattr(day, 'month_name', self.month)
+        if self.year_num:
+            setattr(day, 'year_num', self.year_num)
 
     def __str__(self):
         result = "For {month}: \n".format(month = self.month)
