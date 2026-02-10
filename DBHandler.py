@@ -2,7 +2,9 @@ import shelve
 import matplotlib.pyplot as plt
 import numpy as np
 from EventExceptions import month_list, date_dict, days_list
+from datetime import timedelta as dur
 from datetime import datetime
+import math
 
 def DBFactory():
     try:
@@ -91,6 +93,57 @@ class DBHandler:
         tomorrow_day = days_list[(days_list.index(datetime.now().strftime('%A').lower().strip()) + 1) % 7]
         self.grab_events(tomorrow_year, tomorrow_month, tomorrow_day, tomorrow_date)
 
+    def total_time_watched(self):
+        total = dur()
+        today = datetime.now()
+        today_year = today.year
+        today_month = today.month
+        today_date = today.day
+        year_gen = self.year_list.give_years()
+        year = next(year_gen)
+        while year.number < today_year:
+            # get the total time for the years that are not this one
+            year = next(year_gen)
+        # Now we're going through the current year months
+        month_gen = year.give_months()
+        month = next(month_gen)
+        while month_list.index(month.month.lower()) < today_month:
+            #get the total time for the months that are not the current
+            month = next(month_gen)
+        # Now we're going through the current month dates
+
+
+    def total_upcoming_time(self):
+        total = dur()
+        today = datetime.now()
+        today_year = today.year
+        today_month = today.month
+        today_date = today.day
+        
+
+
+    def total_time(self):
+        total = dur()
+        for year in self.year_list:
+            for month in year:
+                for date in month:
+                    total += date.total_duration()
+        days = total.days
+        remainder = total - dur(days=days)
+        hours = 0
+        mins = math.floor(remainder.seconds / 60)
+        seconds = remainder.seconds - 60 * mins
+        if mins > 60:
+            hours = math.floor(mins / 60)
+            mins -= hours * 60
+
+        return "{days} days {hours} hours {mins} mins {seconds} seconds".format(
+            days = days,
+            hours = hours,
+            mins = mins,
+            seconds = seconds
+        )
+
     def find_max_event_year(self):
         max_count = 0
         max_year = None
@@ -142,19 +195,23 @@ class DBHandler:
         for year in self.year_list:
             for month in year:
                 for date in month:
-                    date_string = str(date.date_num) + '/' + str(month_list.index(month.month.lower())) + '/' + str(year.number)[-2:]
+                    date_string = str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:]
                     xlist.append(date_string)
                     ylist.append(date.num_events())
         
-        plt.figure(figsize=(len(xlist), 6))
-        plt.xticks(rotation=45,ha='right')
-        graph = plt.barh(xlist, ylist)
-        plt.bar_label(graph)
+        #plt.figure(figsize=(len(xlist), 6))
+        fig, ax = plt.subplots(figsize=(16,9))
+        graph = ax.bar(xlist, ylist, color='gray')
+        plt.bar_label(graph, labels=xlist, label_type='center', rotation=90, color='white')
+        plt.bar_label(graph, label_type='edge')
+        plt.xticks([])
         plt.ylim(0, max(ylist) * 1.2)
         plt.xlabel('Dates')
         plt.ylabel('# of Events')
         plt.title('Event Plot')
+        plt.tight_layout()
         plt.show()
+        return fig
 
     def plot_events_year(self):
         xlist = []

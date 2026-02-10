@@ -142,6 +142,7 @@ class InfoScreen(Screen):
             events = max_date_count
         ))
         print("Number of Events:", cls.database.year_list.num_events())
+        print("Total time of events:", cls.database.total_time())
         print("Last modified time:", os.getenv("LAST_MODIFIED"))
         print("Github page:", os.getenv("GITHUB_URL"))
         input("Press anything to return\n")
@@ -298,7 +299,8 @@ class PlotEventsByDateScreen(Screen):
     
     @classmethod
     def main(cls):
-        cls.database.plot_events_date()
+        plt = cls.database.plot_events_date()
+        plt.savefig('test.png', dpi=300, bbox_inches='tight')
         input("Press anything to go back\n")
         return PlotEventsScreen
 

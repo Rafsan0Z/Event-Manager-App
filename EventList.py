@@ -1,5 +1,6 @@
 from collections.abc import MutableSequence
 from EventExceptions import NotAnEventException
+from datetime import timedelta as dur
 from Event import Event
 
 class EventList(MutableSequence):
@@ -45,6 +46,12 @@ class EventList(MutableSequence):
 
     def __iter__(self):
         return self.give_events()
+    
+    def total_duration(self):
+        total_time = dur()
+        for event in self.events:
+            total_time += event.duration
+        return total_time
 
     def __str__(self):
         result = ''

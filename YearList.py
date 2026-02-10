@@ -62,5 +62,12 @@ class YearList(MutableSequence):
         for year in self.years:
             count += len(year)
         return count
+    
+    def give_years(self, reverse = False):
+        for year in self.years:
+            yield year
+    
+    def __iter__(self):
+        return self.give_years()
 
 
