@@ -221,13 +221,15 @@ class DBHandler:
             ylist.append(year.num_events())
         xrange = np.array(xlist)
         yrange = np.array(ylist)
-        graph = plt.bar(xlist, ylist)
+        fig, ax = plt.subplots()
+        graph = ax.bar(xlist, ylist)
         plt.bar_label(graph)
         plt.ylim(0,max(ylist) * 1.2)
         plt.xlabel('Years')
         plt.ylabel('# of Events')
         plt.title('Event Plot')
         plt.show()
+        return fig
 
     def plot_events_month(self):
         xlist = []
@@ -238,14 +240,15 @@ class DBHandler:
                 ylist.append(month.num_events())
         xrange = np.array(xlist)
         yrange = np.array(ylist)
-        #plt.plot(xrange, yrange)
-        graph = plt.bar(xlist, ylist)
+        fig, ax = plt.subplots()
+        graph = ax.bar(xlist, ylist)
         plt.bar_label(graph)
         plt.ylim(0,max(ylist) * 1.2)
         plt.xlabel('Months')
         plt.ylabel('# of Events')
         plt.title('Event Plot')
         plt.show()
+        return fig
 
 #test = DBFactory()
 #print(test.year_list)

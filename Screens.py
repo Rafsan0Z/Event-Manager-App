@@ -286,29 +286,49 @@ class PlotEventsScreen(Screen):
         cls.print_options()
         return cls.process_output()
 
-        
-class PlotEventsByMonthScreen(Screen):
+
+class GenericPlotScreen(Screen):
+
+    @classmethod
+    def save_plot(cls, plt):
+        save_choice = input("If you want to save that graph, press S. Press anything else to not: ").lower()
+        if save_choice == 's':
+            file_name = input("Name the file (do not include any file extensions): ")
+            if file_name.strip() == '':
+                if cls == PlotEventsByDateScreen:
+                    file_name = 'Plot_By_Date'
+                elif cls == PlotEventsByMonthScreen:
+                    file_name = 'Plot_By_Month'
+                elif cls == PlotEventsByYearScreen:
+                    file_name = 'Plot_By_Year'
+                else: file_name = 'Defective'
+            file_name += '.png'
+            plt.savefig(file_name, dpi=300, bbox_inches='tight')
+
+class PlotEventsByMonthScreen(GenericPlotScreen):
     
     @classmethod
     def main(cls):
-        cls.database.plot_events_month()
+        plt = cls.database.plot_events_month()
+        cls.save_plot(plt)
         input("Press anything to go back\n")
         return PlotEventsScreen
 
-class PlotEventsByDateScreen(Screen):
-    
+class PlotEventsByDateScreen(GenericPlotScreen):
+
     @classmethod
     def main(cls):
         plt = cls.database.plot_events_date()
-        plt.savefig('test.png', dpi=300, bbox_inches='tight')
+        cls.save_plot(plt)
         input("Press anything to go back\n")
         return PlotEventsScreen
 
-class PlotEventsByYearScreen(Screen):
-    
+class PlotEventsByYearScreen(GenericPlotScreen):
+
     @classmethod
     def main(cls):
-        cls.database.plot_events_year()
+        plt = cls.database.plot_events_year()
+        cls.save_plot(plt)
         input("Press anything to go back")
         return PlotEventsScreen
 
