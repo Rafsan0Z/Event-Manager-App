@@ -32,8 +32,8 @@ class MainScreen(Screen):
     @classmethod
     def print_options(cls):
         print("(1) View Events")
-        print("(2) Edit Events")
-        print("(3) Add Events")
+        print("(2) Edit Events [Under Construction]")
+        print("(3) Add Events [Under Construction]")
         print("(4) Plot Events")
         print("(5) Info")
         print("(Q) Exit")
@@ -293,10 +293,14 @@ class GenericPlotScreen(Screen):
     def save_plot(cls, plt):
         save_choice = input("If you want to save that graph, press S. Press anything else to not: ").lower()
         if save_choice == 's':
-            file_name = input("Name the file (do not include any file extensions): ")
+            file_name = input("Name the file or leave it empty for default file name (do not include any file extensions): ")
             if file_name.strip() == '':
-                if cls == PlotEventsByDateScreen:
-                    file_name = 'Plot_By_Date'
+                if cls == PlotEventsByAllDateScreen:
+                    file_name = 'Plot_By_All_Date'
+                elif cls == PlotEventsByYearDateScreen:
+                    file_name = 'Plot_By_Yearly_Date'
+                elif cls == PlotEventsByYearAndMonthDateScreen:
+                    file_name = 'Plot_By_Yearly_and_Monthly_Date'
                 elif cls == PlotEventsByMonthScreen:
                     file_name = 'Plot_By_Month'
                 elif cls == PlotEventsByYearScreen:
@@ -314,14 +318,70 @@ class PlotEventsByMonthScreen(GenericPlotScreen):
         input("Press anything to go back\n")
         return PlotEventsScreen
 
-class PlotEventsByDateScreen(GenericPlotScreen):
+class PlotEventsByYearDateScreen(GenericPlotScreen):
+    
+    @classmethod
+    def main(cls):
+        year_num = input("Enter a year: ").lower().strip()
+        while not year_num.isdigit():
+            year_num = input("Please enter a proper year value: ")
+        #plt = cls.database.plot_events_dates_by_year(int(year_num))
+        plt = cls.database.plot_events_by_date('year', int(year_num))
+        cls.save_plot(plt)
+        return PlotEventsByDateScreen
+
+class PlotEventsByYearAndMonthDateScreen(GenericPlotScreen):
+    
+    @classmethod
+    def main(cls):
+        year_num = input("Enter a year: ").lower().strip()
+        while not year_num.isdigit():
+            year_num = input("Please enter a proper year value: ").lower().strip()
+        month_name = input("Enter a month: ").lower().strip()
+        #plt = cls.database.plot_events_dates_by_year_and_month(int(year_num), month_name)
+        plt = cls.database.plot_events_by_date('year month', int(year_num), month_name)
+        cls.save_plot(plt)
+        return PlotEventsByDateScreen
+
+class PlotEventsByAllDateScreen(GenericPlotScreen):
 
     @classmethod
     def main(cls):
-        plt = cls.database.plot_events_date()
+        plt = cls.database.plot_events_by_date('all')
         cls.save_plot(plt)
         input("Press anything to go back\n")
-        return PlotEventsScreen
+        return PlotEventsByDateScreen
+
+class PlotEventsByDateScreen(GenericPlotScreen):
+
+    @classmethod
+    def print_choices(cls):
+        print("Choose one of the following options: ")
+        print("(1) Plot events by dates of a certain Year")
+        print("(2) Plot events by dates of a certain Year AND Month")
+        print("(3) Plot events by all dates")
+        print("(b) Go back")
+        print("Anything else will refresh the screen")
+
+    @classmethod
+    def process_output(cls):
+        choice = input("Enter a choice: ").lower().strip()
+        match choice:
+            case '1':
+                return PlotEventsByYearDateScreen
+            case '2':
+                return PlotEventsByYearAndMonthDateScreen
+            case '3':
+                return PlotEventsByAllDateScreen
+            case 'b':
+                return PlotEventsScreen
+            case _:
+                return cls
+
+    @classmethod
+    def main(cls):
+        cls.print_choices()
+        return cls.process_output()
 
 class PlotEventsByYearScreen(GenericPlotScreen):
 

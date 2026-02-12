@@ -187,19 +187,19 @@ class DBHandler:
                 self.plot_events_month()
             case 'year':
                 self.plot_events_year()
-        
 
-    def plot_events_date(self):
-        xlist = []
-        ylist = []
-        for year in self.year_list:
-            for month in year:
-                for date in month:
-                    date_string = str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:]
-                    xlist.append(date_string)
-                    ylist.append(date.num_events())
+    def plot_events_by_date(self, tag, *args):
+        tag = tag.strip().lower()
+        match tag:
+            case 'year':
+                xlist, ylist = self.plot_events_dates_by_year(*args)
+            case 'year month':
+                xlist, ylist = self.plot_events_dates_by_year_and_month(*args)
+            case 'all':
+                xlist, ylist = self.plot_events_all_dates(*args)
+            case _:
+                return RuntimeError("Incorrect Tag")
         
-        #plt.figure(figsize=(len(xlist), 6))
         fig, ax = plt.subplots(figsize=(16,9))
         graph = ax.bar(xlist, ylist, color='gray')
         plt.bar_label(graph, labels=xlist, label_type='center', rotation=90, color='white')
@@ -212,6 +212,45 @@ class DBHandler:
         plt.tight_layout()
         plt.show()
         return fig
+
+
+    def plot_events_dates_by_year_and_month(self, year_num, month_name):
+        xlist = []
+        ylist = []
+        year = self.year_list.search_years(year_num)[0]
+        month = year.search_months(month_name)[0]
+        for date in month:
+            date_string = str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:]
+            xlist.append(date_string)
+            ylist.append(date.num_events())
+
+        return xlist, ylist
+
+
+    def plot_events_dates_by_year(self, year_num):
+        xlist = []
+        ylist = []
+        year = self.year_list.search_years(year_num)[0]
+        for month in year:
+            for date in month:
+                date_string = str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:]
+                xlist.append(date_string)
+                ylist.append(date.num_events())
+        
+        return xlist, ylist
+
+    def plot_events_all_dates(self):
+        xlist = []
+        ylist = []
+        for year in self.year_list:
+            for month in year:
+                for date in month:
+                    date_string = str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:]
+                    xlist.append(date_string)
+                    ylist.append(date.num_events())
+        
+        #plt.figure(figsize=(len(xlist), 6))
+        return xlist, ylist
 
     def plot_events_year(self):
         xlist = []
