@@ -288,6 +288,63 @@ class DBHandler:
         plt.title('Event Plot')
         plt.show()
         return fig
+    
+    def finalize_time_labels(self, time_list):
+        max_seconds = max([time.seconds for time in time_list])
+        unit = 'secs'
+        ylist = [time.seconds for time in time_list]
+        if max_seconds > 60 * 2:
+            unit = 'mins'
+            ylist =  [time.seconds / 60 for time in time_list]
+        if max_seconds > 60 * 60 * 1.5:
+            unit = 'hours'
+            ylist = [time.seconds / (60 * 60) for time in time_list]
+        if max_seconds > 60 * 60 * 24 * 1.5:
+            unit = 'days'
+            ylist = [time.seconds / (60 * 60 * 24) for time in time_list]
+        
+        labels = [f"{time:.2f} {unit}" for time in ylist]
+        return ylist, labels
+
+    def plot_events_time_by_year(self):
+        time_list = []
+        xlist = []
+        for year in self.year_list:
+            time_list.append(year.total_duration())
+            xlist.append(str(year.number))
+        
+        ylist, labels = self.finalize_time_labels(time_list)
+
+        fig, ax = plt.subplots()
+        graph = ax.bar(xlist, ylist)
+        plt.bar_label(graph, labels=labels)
+        plt.ylim(0,max(ylist) * 1.2)
+        plt.xlabel('Years')
+        plt.ylabel('Time')
+        plt.title('Event Time Plot')
+        plt.show()
+        return fig
+
+    def plot_events_time_by_month(self):
+        time_list = []
+        xlist = []
+        for year in self.year_list:
+            for month in year:
+                time_list.append(month.total_duration())
+                xlist.append(month.month[:3] + str(year.number)[-2:])
+        
+        ylist, labels = self.finalize_time_labels(time_list)
+
+        fig, ax = plt.subplots()
+        graph = ax.bar(xlist, ylist)
+        plt.bar_label(graph, labels=labels)
+        plt.ylim(0,max(ylist) * 1.2)
+        plt.xlabel('Months')
+        plt.ylabel('Time')
+        plt.title('Event Time Plot')
+        plt.show()
+        return fig
+
 
 #test = DBFactory()
 #print(test.year_list)

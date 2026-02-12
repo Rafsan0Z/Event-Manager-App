@@ -1,6 +1,7 @@
 from collections.abc import MutableSequence
 from Date import Date
 from EventExceptions import NotADayException
+from datetime import timedelta as dur
 
 class DateList(MutableSequence):
     
@@ -45,6 +46,13 @@ class DateList(MutableSequence):
         for date in self.days:
             total += date.num_events()
         return total
+    
+    def total_duration(self):
+        total = dur()
+        for date in self.days:
+            total += date.total_duration()
+        return total
+
 
     def __str__(self):
         result = ''

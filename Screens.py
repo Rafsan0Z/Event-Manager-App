@@ -262,6 +262,7 @@ class PlotEventsScreen(Screen):
         print("(1) Plot Events by Year")
         print("(2) Plot Events by Month")
         print("(3) Plot Events by Date")
+        print("(4) Plot Events by Time")
         print("(b) Back to Main Screen")
         print("Anything else will refresh the screen")
 
@@ -275,6 +276,8 @@ class PlotEventsScreen(Screen):
                 return PlotEventsByMonthScreen
             case '3':
                 return PlotEventsByDateScreen
+            case '4':
+                return PlotEventsTime
             case 'b':
                 return MainScreen
             case _:
@@ -285,7 +288,6 @@ class PlotEventsScreen(Screen):
     def main(cls):
         cls.print_options()
         return cls.process_output()
-
 
 class GenericPlotScreen(Screen):
 
@@ -308,6 +310,40 @@ class GenericPlotScreen(Screen):
                 else: file_name = 'Defective'
             file_name += '.png'
             plt.savefig(file_name, dpi=300, bbox_inches='tight')
+
+class PlotEventsTime(GenericPlotScreen):
+
+    @classmethod
+    def main(cls):
+        print("Choose one of the following options")
+        print("(1) Plot Time by Year")
+        print("(2) Plot Time by Month")
+        print("(3) Plot All Time")
+    
+class PlotEventsTimeByYear(GenericPlotScreen):
+
+    @classmethod
+    def main(cls):
+        plt = cls.database.plot_events_time_by_year()
+        cls.save_plot(plt)
+        input("Press anything to go back\n")
+        return PlotEventsTime
+
+class PlotEventsTimeByMonth(GenericPlotScreen):
+
+    @classmethod
+    def main(cls):
+        plt = cls.database.plot_events_time_by_month()
+        cls.save_plot(plt)
+        input("Press anything to go back\n")
+        return PlotEventsTime
+
+class PlotEventsTimeByDate(GenericPlotScreen):
+
+    @classmethod
+    def main(cls):
+        input("Press anything to go back\n")
+        return PlotEventsTime
 
 class PlotEventsByMonthScreen(GenericPlotScreen):
     

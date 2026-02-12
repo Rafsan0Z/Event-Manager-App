@@ -1,6 +1,7 @@
 from collections.abc import MutableSequence
 from Year import Year
 from EventExceptions import NotAnYearException
+from datetime import timedelta as dur
 class YearList(MutableSequence):
 
     def __init__(self):
@@ -63,6 +64,13 @@ class YearList(MutableSequence):
             count += len(year)
         return count
     
+    def total_duration(self):
+        total = dur()
+        for year in self.years:
+            total += year.total_duration()
+        return total
+
+
     def give_years(self, reverse = False):
         for year in self.years:
             yield year

@@ -1,6 +1,7 @@
 from collections.abc import MutableSequence
 from EventExceptions import NotAMonthException
 from Month import Month
+from datetime import timedelta as dur
 class MonthList(MutableSequence):
 
     def __init__(self):
@@ -56,6 +57,11 @@ class MonthList(MutableSequence):
             count += month.num_events()
         return count
 
+    def total_duration(self):
+        total = dur()
+        for month in self.months:
+            total += month.total_duration()
+        return total
     
     def search_months(self, month_name = None):
         if not month_name: return self
