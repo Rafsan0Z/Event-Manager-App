@@ -139,9 +139,9 @@ class PlotFuncs:
             self.year_list = db_handler.getYearList()
     
     def finalize_time_labels(self, time_list):
-        max_seconds = max([time.seconds for time in time_list])
+        max_seconds = min([time.total_seconds() for time in time_list])
         unit = 'secs'
-        ylist = [time.seconds for time in time_list]
+        ylist = [time.total_seconds() for time in time_list]
         if max_seconds > 60 * 2:
             unit = 'mins'
             ylist =  [time.seconds / 60 for time in time_list]
@@ -152,8 +152,8 @@ class PlotFuncs:
             unit = 'days'
             ylist = [time.seconds / (60 * 60 * 24) for time in time_list]
         
-        labels = [f"{time:.2f} {unit}" for time in ylist]
-        return ylist, labels
+        labels = [f" {time:.2f}" for time in ylist]
+        return ylist, labels, unit
     
     def plot_events_year(self):
         xlist = []
@@ -225,16 +225,18 @@ class PlotFuncs:
         time_list = []
         xlist = []
         for year in self.year_list:
-            time_list.append(year.total_duration())
-            xlist.append(str(year.number))
+            year_time = year.total_duration()
+            if year_time: 
+                time_list.append(year_time)
+                xlist.append(str(year.number))
         
-        ylist, labels = self.finalize_time_labels(time_list)
+        ylist, labels, unit = self.finalize_time_labels(time_list)
         fig, ax = plt.subplots()
         graph = ax.bar(xlist, ylist)
         plt.bar_label(graph, labels=labels)
         plt.ylim(0,max(ylist) * 1.2)
         plt.xlabel('Years')
-        plt.ylabel('Time')
+        plt.ylabel(f'Time in {unit}')
         plt.title('Event Time Plot')
         plt.show()
         return fig
@@ -246,18 +248,47 @@ class PlotFuncs:
         else: years = self.year_list
         for year in years:
             for month in year:
-                time_list.append(month.total_duration())
-                xlist.append(month.month[:3] + str(year.number)[-2:])
+                month_time = month.total_duration()
+                if month_time: 
+                    time_list.append(month_time)
+                    xlist.append(month.month[:3] + str(year.number)[-2:])
         
-        ylist, labels = self.finalize_time_labels(time_list)
+        ylist, labels, unit = self.finalize_time_labels(time_list)
         fig, ax = plt.subplots()
         graph = ax.bar(xlist, ylist)
         plt.bar_label(graph, labels=labels)
         plt.ylim(0,max(ylist) * 1.2)
         plt.xlabel('Months')
-        plt.ylabel('Time')
+        plt.ylabel(f'Time in {unit}')
         plt.title('Event Time Plot')
         plt.show()
         return fig
-    
+
+    def plot_time_date(self, year_num = None, month_name = None):
+        time_list = []
+        xlist = []
+        if year_num: years = self.year_list.search_years(year_num)
+        else: years = self.year_list
+        for year in years:
+            if month_name: months = year.search_months(month_name)
+            else: months = year
+            for month in months:
+                for date in month:
+                    date_time = date.total_duration()
+                    if date_time:
+                        time_list.append(date_time)
+                        xlist.append(str(month_list.index(month.month.lower()) + 1) + '/' + str(date.date_num) + '/' + str(year.number)[-2:])
+        
+        ylist, labels, unit = self.finalize_time_labels(time_list)
+        fig, ax = plt.subplots()
+        graph = ax.bar(xlist, ylist)
+        plt.bar_label(graph, labels=xlist, label_type='center', rotation=90, color='white')
+        plt.bar_label(graph, labels=labels, rotation=90)
+        plt.xticks([])
+        plt.ylim(0,max(ylist) * 1.2)
+        plt.xlabel('Dates')
+        plt.ylabel(f'Time in {unit}')
+        plt.title('Event Time Plot')
+        plt.show()
+        return fig
     

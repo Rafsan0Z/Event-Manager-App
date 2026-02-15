@@ -562,6 +562,10 @@ class PlotTimeByDate(Screen):
     class ByYear(GenericPlotScreen):
         
         def main(self):
+            year_num = input("Enter a year: ").lower().strip()
+            while not year_num.isdigit():
+                year_num = input("Please enter a proper year value: ").lower().strip()
+            plt = PlotFuncs(self.db_handler).plot_time_date(int(year_num))
             input("Press anything to go back\n")
             return PlotTimeScreen()
 
@@ -574,6 +578,7 @@ class PlotTimeByDate(Screen):
     class AllDates(GenericPlotScreen):
         
         def main(self):
+            plt = PlotFuncs(self.db_handler).plot_time_date()
             input("Press anything to go back\n")
             return PlotTimeScreen()
 
