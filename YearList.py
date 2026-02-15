@@ -77,5 +77,21 @@ class YearList(MutableSequence):
     
     def __iter__(self):
         return self.give_years()
+    
+    def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None): #send this to yearlist
+        # new_list = YearList()
+        for year in self.search_years(year_num):
+            #print the year num here
+            #print(year.number)
+            # new_list.add_year(year)
+            for month in year.search_months(month_name):
+                #print the month here
+                #print(month.month)
+                for date in month.search_dates(day_name, date_num):
+                    #print the day (and date number) here
+                    #print(date.day_name, date.date_num)
+                    for event in date:
+                        #print the event here
+                        print(event)
 
 

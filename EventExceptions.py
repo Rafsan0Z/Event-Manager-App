@@ -168,7 +168,7 @@ def test_day(day_name, month_name, year_num, date_num):
         raise WrongDayException("The day is wrong for the given year, month and date", day_name, comparison_day)
     else:
         return True
-    
+        
 #test_month("MakeUpMonth")
 #test_date('february', 28)
 #test_day("friday", 'february', 2026, 28)
