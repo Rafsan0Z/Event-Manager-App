@@ -1,5 +1,6 @@
 from collections.abc import MutableSequence
 from abc import ABC, abstractmethod
+from Event import Event
 
 class Change(ABC):
 
@@ -37,6 +38,14 @@ class Change(ABC):
 
 class Add(Change):
 
+    def __init__(self, event , year_num, month_name, day_name, date_num, db_handler):
+        self.event = event
+        self.year = year_num
+        self.month = month_name
+        self.day = day_name
+        self.date = date_num
+        self.db_handler = db_handler
+
     def undo(self):
         # check if the yearlist has this event and if so remove it:
         pass
@@ -46,7 +55,14 @@ class Add(Change):
         pass
 
     def __str__(self):
-        return 'Adding event'
+        result = "------------------------------------------------\n"
+        result += 'Adding new event\n'
+        result += f'Event name: {self.event.event_name}\n'
+        result += f'Event start time: {self.event.time_string}\n'
+        result += f'Event duration: {self.event.duration_string}\n'
+        result += f'Event date: {self.day} the {self.date}, {self.month} of {self.year}\n'
+        result += "------------------------------------------------\n"
+        return result
 
 class Remove(Add):
 
@@ -78,7 +94,8 @@ class EditName(Change):
     def __str__(self):
         result = "------------------------------------------------\n"
         result += 'Editing event name\n'
-        result += f'{self.event}\n'
+        result += f'Original event name: {self.old_name}\n'
+        result += f'New event name: {self.new_name}\n'
         result += "------------------------------------------------\n"
         return result
     
@@ -87,7 +104,7 @@ class EditTime(Change):
     def __init__(self, event, db_handler, start_time):
         super().__init__(event, db_handler)
         self.new_start_time = start_time
-        self.old_start_time = event.start_time
+        self.old_start_time = event.time_string
 
     def undo(self):
         year_list = self.db_handler.getYearlist()
@@ -96,7 +113,12 @@ class EditTime(Change):
         pass
 
     def __str__(self):
-        return 'Editing event time'
+        result = "------------------------------------------------\n"
+        result += 'Editing event start time\n'
+        result += f'Original event start time: {self.old_start_time}\n'
+        result += f'New event time: {self.new_start_time}\n'
+        result += "------------------------------------------------\n"
+        return result
     
 
 class EditDuration(Change):
@@ -104,7 +126,7 @@ class EditDuration(Change):
     def __init__(self, event, db_handler, duration):
         super().__init__(event, db_handler)
         self.new_duration = duration
-        self.old_duration = event.duration
+        self.old_duration = event.duration_string
 
     def undo(self):
         year_list = self.db_handler.getYearlist()
@@ -113,7 +135,12 @@ class EditDuration(Change):
         pass
 
     def __str__(self):
-        return 'Editing event duration'
+        result = "------------------------------------------------\n"
+        result += 'Editing event duration\n'
+        result += f'Original event duration: {self.old_duration}\n'
+        result += f'New event duration: {self.new_duration}\n'
+        result += "------------------------------------------------\n"
+        return result
     
 class EditNotes(Change):
 
@@ -152,8 +179,9 @@ class ChangeList(MutableSequence):
     def insert(self, index, change):
         self.changes.insert(index, change)
 
-    def add_event_change(self, event, db_handler):
-        add_change = Add(event, db_handler)
+    def add_event_change(self, event_name, time_string, duration_string, year_num, month_name, day_name, date_num, db_handler):
+        new_event = Event(event_name, time_string, duration_string)
+        add_change = Add(new_event, year_num, month_name, day_name, date_num, db_handler)
         self.changes.append(add_change)
 
     def remove_event_change(self, event, db_handler):

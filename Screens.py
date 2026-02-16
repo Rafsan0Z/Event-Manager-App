@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from EventExceptions import test_month, is_day, test_day
+from EventExceptions import test_month, is_day, test_day, NotRealDayException, BadMonthException
 from DBHandler import DBFactory
 from DataFuncs import InfoFuncs, StatFuncs, PlotFuncs
 from Changes import ChangeList
@@ -30,6 +30,10 @@ class ChangeScreen(Screen):
 
     def __init__(self, event = None):
         if event: self.event = event
+
+    def present_event(self):
+        print('You have chosen the following event: ')
+        print(self.event)
     
 class MainScreen(ChangeScreen):
 
@@ -70,13 +74,35 @@ class MainScreen(ChangeScreen):
 
 class QueuedChangeScreen(ChangeScreen):
 
+    def process_input(self):
+        choice = input("If you wish to undo or redo any of these changes, please enter their number. To go back enter anything else: ").lower().strip()
+        if choice.isdigit():
+            if int(choice) <= len(self.changeList):
+                chosen_change = self.changeList[int(choice) - 1]
+                action = input("Enter undo or redo: ").lower().strip()
+                while action != 'undo' and action != 'redo':
+                    action = input("Please only enter either undo or redo. Press b to go back to main menu: ").lower().strip()
+                    if action == 'b': return MainScreen()
+                match action:
+                    case 'undo':
+                        chosen_change.undo()
+                    case 'redo':
+                        chosen_change.redo()
+                input("Success!! Now enter anything to return ")
+                return MainScreen()
+            else:
+                input("Invalid number entered, Press anything to return to main menu ")
+                return MainScreen()
+        else:
+            return MainScreen()
+        
+
     def main(self):
         change_index = 1
         for change in self.changeList:
             print(f'[{change_index}] {change}')
             change_index += 1
-        input("Press anything to go back\n")
-        return MainScreen()
+        return self.process_input()
 
 
 
@@ -233,32 +259,90 @@ class ViewFilteredEventsScreen(Screen):
 
 class AddEventsScreen(ChangeScreen):
 
+    def process_time_input(self):
+        hour = input("Now you will enter the time in (am/pm) mode. First enter the hour number (for 12:30pm it would be 12): ").lower().strip()
+        mins = input("Now enter the minutes number (for 12:30pm it would be 30). If the time has no minutes leave it blank (for 12pm or 12:00pm): ").lower().strip()
+        portion = input("Now enter either am or pm: ").lower().strip()
+        return f'{hour}:{mins}{portion}' if mins else f'{hour}{portion}'
+
+    def process_duration_input(self):
+        hours = input("Enter the number of hours: ").lower().strip()
+        while not hours.isdigit() and hours != '':
+            hours = input("Please enter an integer for hours. You can also leave it blank: ").lower().strip()
+        mins = input("Enter the number of mins (not including the hours): ").lower().strip()
+        while not mins.isdigit() and mins != '':
+            mins = input("Please enter an integer for mins. You can also leave it blank: ").lower().strip()
+        if hours and mins:
+            return f'{hours} hours and {mins} mins'
+        elif hours:
+            return f'{hours} hours'
+        else:
+            return ''
+
+    def process_day_input(self):
+        day_candidate = input("Now enter the day name in full (caps incensitive): ").lower().strip()
+        day_correct = False
+        while not day_correct:
+            try:
+                is_day(day_candidate)
+            except NotRealDayException as n:
+                day_candidate = input("Please enter a proper day name: ").lower().strip()
+            else:
+                day_correct = True
+        return day_candidate
+    
+    def process_date_input(self):
+        date = input("Now enter the date number: ").lower().strip()
+        while date == '' or not date.isdigit() or int(date) > 31 or int(date) < 0:
+            date = input("Please enter a proper date: ").lower().strip()
+        return int(date)
+
+    def process_month_input(self):
+        month_candidate = input("Now enter the month name in full (case incensitive): ").lower().strip()
+        month_correct = False
+        while not month_correct:
+            try:
+                test_month(month_candidate)
+            except BadMonthException as b:
+                month_candidate = input("Please enter a correct month name: ").lower().strip()
+            else:
+                month_correct = True
+        return month_candidate
+
+    def process_year_input(self):
+        year_num = input("Finally, enter the year number: ").lower().strip()
+        while year_num == '' or not year_num.isdigit() or int(year_num) <= 2024:
+            year_num = input("Please enter a valid year and no year before 2024: ").lower().strip()
+        return int(year_num)
+
     def main(self):
-        final = ''
+        event_name = input("First enter your Event name: ").strip()
+        time = self.process_time_input()
+        duration = self.process_duration_input()
+        day_name = self.process_day_input()
+        date_num = self.process_date_input() #output is int
+        month_name = self.process_month_input()
+        year_num = self.process_year_input()
 
-        while final == '' or final == 'r':
-            self.clear_screen()
-            event_name = input("First enter your Event name: ").strip()
-            time = input("Now enter when this event will take place: ").strip().lower()
-            day_name = input("Now enter the day name in full: ").strip()
-            date_num = input("Now enter the date (numbers only): ").strip()
-            month_name = input("Now enter the month name in full: ").strip()
-            year_num = input("Finally, enter the year (numbers only): ").strip()
-
-            print("You have entered an event with the following details: ")
-            print("Event Name: {event}".format(event=event_name))
-            print("Time: {time} on {day} the {date}, {month} {year}".format(
-                time = time,
-                day = day_name,
-                date = date_num,
-                month = month_name,
-                year = year_num
-            ))
-
-            final = input("If these details are correct press F to continue. Otherwise Press R to start again: ").lower().strip()
+        try:
+            test_day(day_name, month_name, year_num, date_num)
+        except Exception as e:
+            print("A problem was identified with the information you entered")
+            print("This is most likely due to the date and day name not matching up with the year and month name you entered")
+            input("Please enter anything to restart the process ")
+            return AddEventsScreen()
         
-        input("Your event has been added! Press anything to return\n")
-        return MainScreen()
+        print("You have entered an event with the following details: ")
+        print(f'Event name {event_name}')
+        print(f'Time: {time} on {day_name} the {date_num}, {month_name} {year_num}')
+        final = input("If these details are correct, enter anything to queue the addition. Otherwise press R to start again: ").lower().strip()
+        match final:
+            case 'r':
+                return AddEventsScreen()
+            case _:
+                self.changeList.add_event_change(event_name, time, duration, year_num, month_name, day_name, date_num, self.db_handler)
+                input("Addition queued successfully! Enter anything to return to main menu ")
+                return MainScreen()
 
 
 class EditEventsScreen(Screen):
@@ -347,15 +431,17 @@ class EditEventsScreen(Screen):
 class EditEventName(ChangeScreen):
 
     def main(self):
+        self.present_event()
         new_name = input("Enter a new name: ")
         self.changeList.edit_name_change(self.event, self.db_handler, new_name)
         input("Change is queued! Press anything to go back to Main Screen ")
         return MainScreen()
 
 class EditEventTime(ChangeScreen):
-    
+
     def main(self):
-        new_start_time = input("Enter a new start time: ")
+        self.present_event()
+        new_start_time = input("Enter a new start time (in am/pm mode): ")
         self.changeList.edit_time_change(self.event, self.db_handler, new_start_time)
         input("Change is queued! Press anything to go back to Main Screen ")
         return MainScreen()
@@ -363,7 +449,16 @@ class EditEventTime(ChangeScreen):
 class EditEventDuration(ChangeScreen):
 
     def main(self):
-        new_duration = input("Enter a new duration: ")
+        self.present_event()
+        hours = input("Enter the number of hours: ").lower().strip()
+        while not hours.isdigit():
+            hours = input("Please enter an integer for hours. Press b to return back: ").lower().strip()
+            if hours == 'b': return EditEventsScreen()
+        mins = input("Enter the number of mins (not including the hours): ").lower().strip()
+        while not mins.isdigit():
+            mins = input("Please enter an integer for mins. Press b to return back: ").lower().strip()
+            if mins == 'b': return EditEventsScreen()
+        new_duration = f'{hours} and {mins} mins'
         self.changeList.edit_duration_change(self.event, self.db_handler, new_duration)
         input("Change is queued! Press anything to go back to Main Screen ")
         return MainScreen()
