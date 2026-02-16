@@ -23,6 +23,9 @@ class InfoFuncs:
     def getGithubLink(self):
         return os.getenv("GITHUB_URL")
     
+    def getDocPullTime(self):
+        return os.getenv("DOCUMENT_PULL_TIME")
+    
     def getNumofYears(self):
         return len(self.year_list)
     

@@ -1,5 +1,7 @@
 from collections.abc import MutableSequence
 from Year import Year
+from Event import Event
+from EventList import EventList
 from EventExceptions import NotAnYearException
 from datetime import timedelta as dur
 class YearList(MutableSequence):
@@ -79,19 +81,24 @@ class YearList(MutableSequence):
         return self.give_years()
     
     def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None): #send this to yearlist
-        # new_list = YearList()
+        return_list = EventList()
+        event_index = 1
         for year in self.search_years(year_num):
             #print the year num here
-            #print(year.number)
-            # new_list.add_year(year)
+            print(f'For {year.number}')
             for month in year.search_months(month_name):
                 #print the month here
-                #print(month.month)
+                print(f'For {month.month}')
                 for date in month.search_dates(day_name, date_num):
                     #print the day (and date number) here
-                    #print(date.day_name, date.date_num)
+                    print(f'For {date.day_name} the {date.date_num}')
                     for event in date:
                         #print the event here
-                        print(event)
+                        print(f'({event_index}) {event}')
+                        new_event = Event(event.event_name, event.time_string, event.duration_string, event.notes_string)
+                        return_list.append(event)
+                        event_index += 1
+        return return_list
+
 
 

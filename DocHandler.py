@@ -1,6 +1,7 @@
 import os.path
 import os
 import json
+from time import process_time as timer
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from google.auth.transport.requests import Request
@@ -36,6 +37,7 @@ class DocHandler:
             return super().__new__(cls)
 
     def __init__(self):
+        self.start_time = timer()
         load_dotenv()
         self.creds = None
         self.validate()
@@ -84,6 +86,7 @@ class DocHandler:
         env_path = find_dotenv()
         set_key(env_path, "LAST_MODIFIED", est_time.strftime('%Y-%m-%d %I:%M %p'))
         set_key(env_path, 'FILE_NAME', metadata.get('name'))
+        set_key(env_path, 'DOCUMENT_PULL_TIME', f'{timer() - self.start_time:.3f} secs')
 
     def pull_doc(self):
         pass

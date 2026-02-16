@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from EventExceptions import test_month, is_day
+from EventExceptions import test_month, is_day, test_day
 from DBHandler import DBFactory
 from DataFuncs import InfoFuncs, StatFuncs, PlotFuncs
+from Changes import ChangeList
 from dotenv import load_dotenv
 import os
 import click
@@ -9,6 +10,7 @@ import click
 def start():
     database_handler = DBFactory()
     Screen.db_handler = database_handler
+    ChangeScreen.changeList = ChangeList()
     screen = MainScreen()
     while screen:
         screen.clear_screen()
@@ -17,14 +19,19 @@ def start():
 class Screen(ABC):
 
     @abstractmethod
-    def main(cls):
+    def main(self):
         pass
 
     @staticmethod
     def clear_screen():
         click.clear()
 
-class MainScreen(Screen):
+class ChangeScreen(Screen):
+
+    def __init__(self, event = None):
+        if event: self.event = event
+    
+class MainScreen(ChangeScreen):
 
     def print_options(self):
         print("(1) View Events")
@@ -32,6 +39,7 @@ class MainScreen(Screen):
         print("(3) Add Events [Under Construction]")
         print("(4) Plot Events")
         print("(5) Info")
+        if len(self.changeList): print("(6) Review Queued Changes")
         print("(Q) Exit")
         print(" Anything else will refresh the screen ")
 
@@ -48,6 +56,8 @@ class MainScreen(Screen):
                 return PlotScreen()
             case '5':
                 return InfoScreen()
+            case '6' if len(self.changeList):
+                return QueuedChangeScreen()
             case 'q':
                 return None
             case _:
@@ -57,6 +67,18 @@ class MainScreen(Screen):
         print("This is the main screen")
         self.print_options()
         return self.process_inputs()
+
+class QueuedChangeScreen(ChangeScreen):
+
+    def main(self):
+        change_index = 1
+        for change in self.changeList:
+            print(f'[{change_index}] {change}')
+            change_index += 1
+        input("Press anything to go back\n")
+        return MainScreen()
+
+
 
 class ViewAllEventsScreen(Screen):
 
@@ -103,25 +125,27 @@ class ViewEventsScreen(Screen):
 
 class InfoScreen(Screen):
 
+    def __init__(self):
+        self.infofuncs = InfoFuncs(self.db_handler)
+        self.statfuncs = StatFuncs(self.db_handler)
+
     def main(self):
-        infofuncs = InfoFuncs(self.db_handler)
-        statfuncs = StatFuncs(self.db_handler)
-        max_year, max_year_count = statfuncs.find_max_event_year()
-        max_month, max_month_count = statfuncs.find_max_event_month()
-        max_date, max_date_count = statfuncs.find_max_event_date()
-        print("Name of the Document:", infofuncs.getDocName())
-        print("Number of Years:", infofuncs.getNumofYears())
+        max_year, max_year_count = self.statfuncs.find_max_event_year()
+        max_month, max_month_count = self.statfuncs.find_max_event_month()
+        max_date, max_date_count = self.statfuncs.find_max_event_date()
+        print("Name of the Document:", self.infofuncs.getDocName())
+        print("Number of Years:", self.infofuncs.getNumofYears())
         print("Year with the most events: {year} with {events} events".format(
             year = max_year.number,
             events = max_year_count
         ))
-        print("Number of Months:", infofuncs.getNumofMonths())
+        print("Number of Months:", self.infofuncs.getNumofMonths())
         print("Month with the most events: {month} of {year} with {events} events".format(
             month = max_month.month,
             year = max_month.year_num,
             events = max_month_count
         ))
-        print("Number of Days:", infofuncs.getNumofDays())
+        print("Number of Days:", self.infofuncs.getNumofDays())
         print("Day with the most events: {day} the {date}, {month} of {year} with {events} events".format(
             date = max_date.date_num,
             day = max_date.day_name,
@@ -129,10 +153,11 @@ class InfoScreen(Screen):
             year = max_date.year_num,
             events = max_date_count
         ))
-        print("Number of Events:", infofuncs.getNumofEvents())
-        print("Total time of events:", statfuncs.total_time())
-        print("Last modified time:", infofuncs.getLastModTime())
-        print("Github page:", infofuncs.getGithubLink())
+        print("Number of Events:", self.infofuncs.getNumofEvents())
+        print("Total time of events:", self.statfuncs.total_time())
+        print("Last modified time:", self.infofuncs.getLastModTime())
+        print("Time to pull and flush from Google Doc:", self.infofuncs.getDocPullTime())
+        print("Github page:", self.infofuncs.getGithubLink())
         input("Press anything to return\n")
         return MainScreen()
 
@@ -206,7 +231,7 @@ class ViewFilteredEventsScreen(Screen):
         input("Press something to return: ")
         return ViewEventsScreen()
 
-class AddEventsScreen(Screen):
+class AddEventsScreen(ChangeScreen):
 
     def main(self):
         final = ''
@@ -241,7 +266,7 @@ class EditEventsScreen(Screen):
     def filter_message(self, **options):
         result = "Displaying events based on: "
         if options.get('year', None):
-            result += 'the Year ' + options.get('year') + "| "
+            result +=  f'the Year {options.get('year')} |'
         else: result += 'Any Year| '
         if options.get('month', None):
             result += 'the month of ' + options.get('month') + "| "
@@ -263,24 +288,86 @@ class EditEventsScreen(Screen):
                 correct_input = True
         return output
 
+    def print_options(self):
+        print("Now pick from one of the following edit choices: ")
+        print("(1) Edit the name")
+        print("(2) Edit the start time")
+        print("(3) Edit the duration")
+        print("(4) Edit the notes")
+        print("(b) Go Back to main screen")
+        print("Anything else will refresh the screen (AND YOU WILL LOSE YOUR SELECTION)")
+
+
+    def process_input(self, event):
+        choice = input("Input: ").lower().strip()
+        match choice:
+            case '1':
+                return EditEventName(event)
+            case '2':
+                return EditEventTime(event)
+            case '3':
+                return EditEventDuration(event)
+            case '4':
+                pass
+            case 'b':
+                return MainScreen()
+            case _:
+                return EditEventsScreen()
+
+
     def main(self):
         choice = ''
 
-        while choice == '' or choice == 'r':
+        while choice == '' and choice != 'b':
             print("We'll edit the chosen event here, only one event can be edited at a time [for now!]")
             print("Enter the filter values, leave a filter empty if you want all events under that fileter")
             year = self.process_time_item("Year")
             month = self.process_time_item('Month', test_month)
             day = self.process_time_item('Day', is_day)
+            date = self.process_time_item('Date') #Assumes I enter the correct date for now!
+            year = int(year) if year else None
+            date = int(date) if date else None
+            #test_day(day, month, year, date)
             self.filter_message(year=year,month=month,day=day)
 
+            search_list = self.db_handler.getYearList().grab_events(year, month, day, date)
+
             choice = input("Now pick one of the following events by entering the number. Enter B to go back to the Main Screen. Enter anything else to reset your filters: ").lower().strip()
-            if choice == 'b': return MainScreen()
-            elif choice.isdigit(): break
+            #if choice == 'b': return MainScreen()
+            if choice.isdigit():
+                self.clear_screen()
+                print(f'You have chosen the following event: \n {search_list[int(choice) - 1]}')
+                self.print_options()
+                return self.process_input(search_list[int(choice) - 1])
             else : self.clear_screen()
         
-        input("Edit complete! Press anything to go back: ")
+        input("Invalid input. Press anything to return ")
         return MainScreen()
+
+class EditEventName(ChangeScreen):
+
+    def main(self):
+        new_name = input("Enter a new name: ")
+        self.changeList.edit_name_change(self.event, self.db_handler, new_name)
+        input("Change is queued! Press anything to go back to Main Screen ")
+        return MainScreen()
+
+class EditEventTime(ChangeScreen):
+    
+    def main(self):
+        new_start_time = input("Enter a new start time: ")
+        self.changeList.edit_time_change(self.event, self.db_handler, new_start_time)
+        input("Change is queued! Press anything to go back to Main Screen ")
+        return MainScreen()
+
+class EditEventDuration(ChangeScreen):
+
+    def main(self):
+        new_duration = input("Enter a new duration: ")
+        self.changeList.edit_duration_change(self.event, self.db_handler, new_duration)
+        input("Change is queued! Press anything to go back to Main Screen ")
+        return MainScreen()
+
 
 class PlotScreen(Screen):
 
@@ -339,6 +426,9 @@ class PlotEventsScreen(Screen):
 
 class GenericPlotScreen(Screen):
 
+    def __init__(self):
+        self.plotfuncs = PlotFuncs(self.db_handler)
+
     def save_plot(self, plt):
         save_choice = input("If you want to save that graph, press S. Press anything else to not: ").lower()
         if save_choice == 's':
@@ -359,9 +449,8 @@ class GenericPlotScreen(Screen):
 class PlotEventsByYear(GenericPlotScreen):
 
     def main(self):
-        plotfuncs = PlotFuncs(self.db_handler)
-        plt = plotfuncs.plot_events_year()
-        #plt = cls.database.plot_events_year()
+        #plotfuncs = PlotFuncs(self.db_handler)
+        plt = self.plotfuncs.plot_events_year()
         self.save_plot(plt)
         input("Press anything to go back")
         return PlotEventsScreen()
@@ -380,7 +469,8 @@ class PlotEventsByMonth(Screen):
         def main(self):
             year_num = self.process_input()
             if year_num == 'b': return PlotEventsByMonth()
-            plt = PlotFuncs(self.db_handler).plot_events_month(int(year_num))
+            #plt = PlotFuncs(self.db_handler).plot_events_month(int(year_num))
+            plt = self.plotfuncs.plot_events_month(int(year_num))
             self.save_plot(plt)
             input("Press anything to go back")
             return PlotEventsByMonth()
@@ -388,7 +478,8 @@ class PlotEventsByMonth(Screen):
     class AllMonths(GenericPlotScreen):
         
         def main(self):
-            plt = PlotFuncs(self.db_handler).plot_events_month()
+            #plt = PlotFuncs(self.db_handler).plot_events_month()
+            plt = self.plotfuncs.plot_events_month()
             self.save_plot(plt)
             input("Press anything to go back")
             return PlotEventsByMonth()

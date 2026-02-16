@@ -69,7 +69,7 @@ class Month(DateList):
         final_index = self.__insert_pos(day)
         if final_index != i and i != len(self):
             print("The index you provided is not correct, but we've inserted the day in the correct position")
-        if self.year_num:
+        if hasattr(self, 'year_num'):
             try:
                 test_day(day.day_name, self.month, self.year_num, day.date_num)
             except WrongDateException as w:
@@ -80,7 +80,7 @@ class Month(DateList):
 
     def give_month_to_days(self, day): 
         setattr(day, 'month_name', self.month)
-        if self.year_num:
+        if hasattr(self, 'year_num'):
             setattr(day, 'year_num', self.year_num)
 
     def __str__(self):

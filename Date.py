@@ -49,6 +49,15 @@ class Date(Day):
         self.date_num = date_num
         super().__init__(day_name)
 
+    def insert(self, index, event):
+        setattr(event, 'day_name', self.day_name)
+        setattr(event, 'date_num', self.date_num)
+        if hasattr(self, 'month_name'):
+            setattr(event, 'month_name', self.month_name)
+        if hasattr(self, 'year_num'):
+            setattr(event, 'year_num', self.year_num)
+        super().insert(index, event)
+
     def __str__(self):
         without_top_line = "\n".join(super().__str__().split('\n')[1:])
         new_top_line = "{day} {date}\n".format(
