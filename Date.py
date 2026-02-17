@@ -61,6 +61,9 @@ class Date(Day):
             setattr(event, 'year_num', self.year_num)
         super().insert(index, event)
 
+    def add_event(self, event):
+        self.append(event)
+
     def __str__(self):
         without_top_line = "\n".join(super().__str__().split('\n')[1:])
         new_top_line = "{day} {date}\n".format(

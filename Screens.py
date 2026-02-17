@@ -16,6 +16,7 @@ def start():
     while screen:
         screen.clear_screen()
         screen = screen.main()
+    if ChangeScreen.changeList: FinalChanges()
 
 class Screen(ABC):
 
@@ -35,6 +36,22 @@ class ChangeScreen(Screen):
     def present_event(self):
         print('You have chosen the following event: ')
         print(self.event)
+
+class FinalChanges(ChangeScreen):
+
+    def __init__(self):
+        self.clear_screen()
+        print("Final Screen")
+        self.main()
+
+    def main(self):
+        change_index = 1
+        for change in self.changeList:
+            print(f'[{change_index}] {change}')
+            change_index += 1
+        input("These changes will be flushed now. Press anything to continue ")
+        self.clear_screen()
+        return 
     
 class MainScreen(ChangeScreen):
 
@@ -112,7 +129,7 @@ class ViewAllEventsScreen(Screen):
     def main(self):
         print("This is the class method for the view events screen")
         print("Enter value to view filtered events. Only press enter if not to filter by that value, leave all filters blank to view all events")
-        self.db_handler.grab_events()
+        self.db_handler.getYearList().grab_events()
         input("Enter anything to return ")
         return ViewEventsScreen()
 
@@ -254,7 +271,7 @@ class ViewFilteredEventsScreen(Screen):
         self.filter_message(year=year,month=month,day=day,date=date)
         if year: year = int(year)
         if date: date = int(date)
-        #cls.database.grab_events(year,month,day,date)
+        self.db_handler.getYearList().grab_events(year, month, day, date)
         input("Press something to return: ")
         return ViewEventsScreen()
 
@@ -498,7 +515,7 @@ class PlotEventsScreen(Screen):
         print("(1) Plot Events by Year")
         print("(2) Plot Events by Month")
         print("(3) Plot Events by Date")
-        print("(b) Back to Main Screen")
+        print("(b) Go Back")
         print("Anything else will refresh the screen")
 
     def process_output(self):
@@ -511,7 +528,7 @@ class PlotEventsScreen(Screen):
             case '3':
                 return PlotEventsByDate()
             case 'b':
-                return MainScreen()
+                return PlotScreen()
             case _:
                 return self
             

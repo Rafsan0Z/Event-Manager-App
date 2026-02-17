@@ -33,6 +33,15 @@ class Year(MonthList):
             self.__claimed_months.append(month.month)
             self.months.insert(i, month)
 
+    def add_event(self, event, month_name, day_name, date_num):
+        target_month = self.find_month(month_name)
+        if target_month:
+            target_month.add_event(event, day_name, date_num)
+        else:
+            new_month = Month(month_name)
+            self.append(new_month)
+            new_month.add_event(event, day_name, date_num)
+
     def give_events(self):
         for month in self.months:
             for day in month.days:

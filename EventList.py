@@ -20,6 +20,12 @@ class EventList(MutableSequence):
     def check_event_type(self, event_candidate):
         if not isinstance(event_candidate, Event):
             raise NotAnEventException(event_candidate)
+        
+    def does_event_exist(self, new_event):
+        for event in self.events:
+            if event == new_event: return True
+        return False
+
 
     def __setitem__(self, i, event):
         self.check_event_type(event)
@@ -28,9 +34,19 @@ class EventList(MutableSequence):
     def __delitem__(self, i):
         del self.events[i]
 
+    def __insert_pos(self, new_event):
+        index = 0
+        for event in self.events:
+            if new_event.start_time <= event.start_time:
+                break
+            index += 1
+        return index
+
     def insert(self, i, event):
         self.check_event_type(event)
-        self.events.insert(i, event)
+        if self.does_event_exist(event): return
+        index = self.__insert_pos(event)
+        self.events.insert(index, event)
 
     def add_event(self, event):
         if not isinstance(event, Event):

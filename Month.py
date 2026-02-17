@@ -1,4 +1,4 @@
-from DateList import DateList
+from DateList import DateList, Date
 from EventExceptions import test_month, test_day, date_dict, WrongDateException
 import math
 
@@ -73,6 +73,15 @@ class Month(DateList):
         result += super().__str__()
         return result
     
+    def add_event(self, event, day_name, date_num):
+        target_day = self.find_date(day_name, date_num)
+        if target_day:
+            target_day.add_event(event)
+        else:
+            new_day = Date(day_name, date_num)
+            self.append(new_day)
+            new_day.add_event(event)
+
     def get_month_name(self):
         return self.month
 

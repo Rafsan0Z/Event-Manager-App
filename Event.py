@@ -1,11 +1,11 @@
-from datetime import timedelta as dur
+from datetime import datetime, timedelta as dur
 
 class Event:
 
     def __init__(self, name, time_string = '', duration_string = '', notes_string = ''):
         self.event_name = name
 
-        self.time_string = time_string
+        self.time_string = time_string.lower()
         self.process_time_string()
 
         self.duration_string = duration_string
@@ -34,8 +34,11 @@ class Event:
         return event_line + notes_lines
     
     def process_time_string(self):
-        return 
-    
+        if ':' in self.time_string:
+            self.start_time = datetime.strptime(self.time_string, '%I:%M%p').time()
+        else:
+            self.start_time = datetime.strptime(self.time_string, '%I%p').time()
+
     def process_duration_string(self):
         hours = 0
         mins = 0

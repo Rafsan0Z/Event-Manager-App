@@ -1,6 +1,6 @@
 from collections.abc import MutableSequence
 from abc import ABC, abstractmethod
-from Event import Event
+from Event import DocumentedEvent
 
 class Change(ABC):
 
@@ -8,7 +8,6 @@ class Change(ABC):
         self.load_event_info(event)
         self.db_handler = db_handler
         self.set_index()
-        self.undone = False
 
     def set_index(self):
         self.year_list = self.db_handler.getYearList()
@@ -25,6 +24,9 @@ class Change(ABC):
             self.date_num = event.date_num
             self.day_name = event.day_name 
 
+    def get_change_string(self):
+        return 'Undo' if self.done else 'Redo'
+
     @abstractmethod
     def undo(self):
         pass
@@ -33,9 +35,8 @@ class Change(ABC):
     def redo(self):
         pass
 
-    @abstractmethod
     def __str__(self):
-        pass
+        return f"------------------------------------------------[{self.get_change_string()}]\n"
 
 class Add(Change):
 
@@ -46,34 +47,21 @@ class Add(Change):
         self.day = day_name
         self.date = date_num
         self.db_handler = db_handler
+        self.redo()
 
     def undo(self):
         # check if the yearlist has this event and if so remove it:
-        year_list = self.db_handler.getYearList()
-        years = year_list.search_years(self.year)
-        if not years: return
-        for year in years:
-            months = year.search_months(self.month)
-            if not months: return
-            for month in months:
-                dates = month.search_dates(self.day, self.date)
-                if not dates: return
-                for date in dates:
-                    removed_event = None
-                    for event in date:
-                        if self.event == event:
-                            removed_event = event
-                            break
-                    if removed_event:
-                        pass #remove here
+        self.done = False
                         
         
     def redo(self):
         #check if the yearlist doesn't have this event and if so, add it:
-        pass
+        year_list = self.db_handler.getYearList()
+        year_list.add_event(self.event, self.year, self.month, self.day, self.date)
+        self.done = True
 
     def __str__(self):
-        result = "------------------------------------------------\n"
+        result = super().__str__()
         result += 'Adding new event\n'
         result += f'Event name: {self.event.event_name}\n'
         result += f'Event start time: {self.event.time_string}\n'
@@ -110,7 +98,7 @@ class EditName(Change):
         pass
 
     def __str__(self):
-        result = "------------------------------------------------\n"
+        result = super().__str__()
         result += 'Editing event name\n'
         result += f'Original event name: {self.old_name}\n'
         result += f'New event name: {self.new_name}\n'
@@ -131,7 +119,7 @@ class EditTime(Change):
         pass
 
     def __str__(self):
-        result = "------------------------------------------------\n"
+        result = super().__str__()
         result += 'Editing event start time\n'
         result += f'Original event start time: {self.old_start_time}\n'
         result += f'New event time: {self.new_start_time}\n'
@@ -153,7 +141,7 @@ class EditDuration(Change):
         pass
 
     def __str__(self):
-        result = "------------------------------------------------\n"
+        result = super().__str__()
         result += 'Editing event duration\n'
         result += f'Original event duration: {self.old_duration}\n'
         result += f'New event duration: {self.new_duration}\n'
@@ -198,7 +186,7 @@ class ChangeList(MutableSequence):
         self.changes.insert(index, change)
 
     def add_event_change(self, event_name, time_string, duration_string, year_num, month_name, day_name, date_num, db_handler):
-        new_event = Event(event_name, time_string, duration_string)
+        new_event = DocumentedEvent(event_name, time_string, duration_string)
         add_change = Add(new_event, year_num, month_name, day_name, date_num, db_handler)
         self.changes.append(add_change)
 

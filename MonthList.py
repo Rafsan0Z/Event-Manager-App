@@ -69,3 +69,7 @@ class MonthList(MutableSequence):
         for month in self.months:
             if month.month.lower() == month_name: filtered.append(month)
         return filtered
+    
+    def find_month(self, month_name):
+        for month in self.months:
+            if month.month.lower() == month_name: return month

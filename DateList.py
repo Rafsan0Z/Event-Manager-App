@@ -86,6 +86,13 @@ class DateList(MutableSequence):
                 filtered.append(day)
         return filtered
     
+    def find_date(self, day_name, date_num):
+        for day in self.days:
+            if day.date_num == date_num and day.day_name.lower() == day_name:
+                return day
+            
+
+    
 # test = DateList()
 # test.append(Date('Monday', 1))
 # test.append(Date('Monday', 4))
