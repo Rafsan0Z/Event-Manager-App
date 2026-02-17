@@ -4,6 +4,7 @@ from DBHandler import DBFactory
 from DataFuncs import InfoFuncs, StatFuncs, PlotFuncs
 from Changes import ChangeList
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 import click
 
@@ -523,25 +524,27 @@ class GenericPlotScreen(Screen):
 
     def __init__(self):
         self.plotfuncs = PlotFuncs(self.db_handler)
+        self.dirname = 'Event Plots'
 
     def save_plot(self, plt):
         save_choice = input("If you want to save that graph, press S. Press anything else to not: ").lower()
         if save_choice == 's':
             file_name = input("Name the file or leave it empty for default file name (do not include any file extensions): ")
-            match self:
-                case PlotEventsByDate():
-                    file_name = 'Plot_By_Date'
-                case PlotEventsByMonth():
-                    file_name = 'Plot_By_Month'
-                case PlotEventsByYear():
-                    file_name = 'Plot_By_Year'
-                case _:
-                    file_name = 'defective'
+            if file_name.lower().strip() == '':
+                file_name = self.default_file_name
             file_name += '.png'
-            plt.savefig(file_name, dpi=300, bbox_inches='tight')
+            dir = Path(__file__).parent / 'Plots'
+            dir.mkdir(exist_ok=True)
+            dest = dir / self.dirname
+            dest.mkdir(exist_ok=True)
+            plt.savefig(str(dest / file_name), dpi=300, bbox_inches='tight')
 
 
 class PlotEventsByYear(GenericPlotScreen):
+
+    def __init__(self):
+        super().__init__()
+        self.default_file_name = 'Yearly Events Plot'
 
     def main(self):
         #plotfuncs = PlotFuncs(self.db_handler)
@@ -553,6 +556,10 @@ class PlotEventsByYear(GenericPlotScreen):
 class PlotEventsByMonth(Screen):
     
     class ByYear(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Monthly Events Plot By Year'
 
         def process_input(self):
             year_num = input("Enter a year: ").lower().strip()
@@ -571,6 +578,10 @@ class PlotEventsByMonth(Screen):
             return PlotEventsByMonth()
 
     class AllMonths(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Monthly Events Plot'
         
         def main(self):
             #plt = PlotFuncs(self.db_handler).plot_events_month()
@@ -607,6 +618,10 @@ class PlotEventsByMonth(Screen):
 class PlotEventsByDate(Screen):
 
     class ByYear(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Events Plot By Year'
         
         def main(self):
             year_num = input("Enter a year: ").lower().strip()
@@ -617,6 +632,10 @@ class PlotEventsByDate(Screen):
             return PlotEventsByDate()
 
     class ByMonthandYear(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Events Plot By Year and Month'
         
         def main(self):
             year_num = input("Enter a year: ").lower().strip()
@@ -629,6 +648,10 @@ class PlotEventsByDate(Screen):
 
 
     class AllDates(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Events Plot'
         
         def main(self):
             plt = PlotFuncs(self.db_handler).plot_events_date()
@@ -693,6 +716,11 @@ class PlotTimeScreen(Screen):
 
 class PlotTimeByYear(GenericPlotScreen):
 
+    def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Yearly Time Plot'
+            self.dirname = 'Time Plots'
+
     def main(self):
         plt = PlotFuncs(self.db_handler).plot_time_year()
         self.save_plot(plt)
@@ -703,6 +731,11 @@ class PlotTimeByMonth(Screen):
 
     class ByYear(GenericPlotScreen):
         
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Monthly Time Plot By Year'
+            self.dirname = 'Time Plots'
+
         def main(self):
             year_num = input("Enter a year: ").lower().strip()
             while not year_num.isdigit():
@@ -713,6 +746,11 @@ class PlotTimeByMonth(Screen):
             return PlotTimeScreen()
 
     class AllMonths(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Monthly Time Plot'
+            self.dirname = 'Time Plots'
         
         def main(self):
             plt = PlotFuncs(self.db_handler).plot_time_month()
@@ -746,6 +784,11 @@ class PlotTimeByMonth(Screen):
 class PlotTimeByDate(Screen):
 
     class ByYear(GenericPlotScreen):
+
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Time Plot By Year'
+            self.dirname = 'Time Plots'
         
         def main(self):
             year_num = input("Enter a year: ").lower().strip()
@@ -757,12 +800,22 @@ class PlotTimeByDate(Screen):
 
     class ByMonthandYear(GenericPlotScreen):
         
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Time Plot By Year and Month'
+            self.dirname = 'Time Plots'
+
         def main(self):
             input("Press anything to go back\n")
             return PlotTimeScreen()
 
     class AllDates(GenericPlotScreen):
         
+        def __init__(self):
+            super().__init__()
+            self.default_file_name = 'Daily Time Plot'
+            self.dirname = 'Time Plots'
+
         def main(self):
             plt = PlotFuncs(self.db_handler).plot_time_date()
             input("Press anything to go back\n")

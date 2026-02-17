@@ -64,7 +64,7 @@ class Event:
         self.process_duration_string()
 
     def edit_name(self, name):
-        self.name = name
+        self.event_name = name
 
     def edit_duration(self, hours = 0, mins = 0):
         self.duration = dur(hours=hours, minutes=mins)
@@ -82,6 +82,59 @@ class Event:
     def set_host(self, host):
         self.host = host
 
+    def get_name(self):
+        return self.event_name
+    
+    def get_duration(self):
+        return self.duration
+
+    def get_duration_string(self):
+        return self.duration_string
+    
+    def get_time(self):
+        pass
+
+    def get_time_string(self):
+        return self.time_string
+    
+    def get_notes(self):
+        return self.notes
+    
+    def get_notes_string(self):
+        return self.notes_string
+    
+    def get_attached_info(self):
+        dict = {'year_num': None, 'month_name': None, 'day_name': None, 'date_num': None}
+        for attrib in dict.items():
+            if hasattr(self, attrib):
+                dict[attrib] = getattr(self, attrib)
+        return dict
+
+
+    def __eq__(self, other):
+        if hasattr(self, 'year_num') or hasattr(other, 'year_num'):
+            if hasattr(self, 'year_num') and hasattr(other, 'year_num'):
+                if self.year_num != other.year_num: return False
+            else: return False
+        
+        if hasattr(self, 'month_name') or hasattr(other, 'month_name'):
+            if hasattr(self, 'month_name') and hasattr(other, 'month_name'):
+                if self.month_name != other.month_name: return False
+            else: return False
+        
+        if hasattr(self, 'date_num') or hasattr(other, 'date_num'):
+            if hasattr(self, 'date_num') and hasattr(other, 'date_num'):
+                if self.date_num != other.date_num: return False
+            else: return False
+        
+        if hasattr(self, 'day_name') or hasattr(other, 'day_name'):
+            if hasattr(self, 'day_name') and hasattr(other, 'day_name'):
+                if self.day_name != other.day_name: return False
+            else: return False
+
+        return self.event_name == other.event_name and self.duration == other.duration 
+        
+        
 
 class DocumentedEvent(Event):
 

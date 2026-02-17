@@ -29,21 +29,6 @@ class Month(DateList):
         #self.month = state['month_name']
         self.days = state['days']
         if state['year_num']: self.year_num = state['year_num']
-
-    # def __insert_pos(self, day):
-    #     self.check_day_type(day)
-    #     if not len(self): return 0
-    #     left_index = 0
-    #     right_index = len(self) - 1
-    #     mid_index = 0
-    #     while left_index <= right_index:
-    #         mid_index = math.floor((left_index + right_index) / 2)
-    #         mid_day = self[mid_index]
-    #         if mid_day.date_num < day.date_num:
-    #             left_index = mid_index + 1
-    #         elif mid_day.date_num > day.date:
-    #             right_index = mid_index - 1
-    #     return mid_index
     
     def __insert_pos(self, date):
         self.check_day_type(date)
@@ -87,6 +72,9 @@ class Month(DateList):
         result = "For {month}: \n".format(month = self.month)
         result += super().__str__()
         return result
+    
+    def get_month_name(self):
+        return self.month
 
 #test = Month('January')
 #print(test)

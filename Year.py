@@ -46,14 +46,8 @@ class Year(MonthList):
         result += super().__str__()
         return result
 
-
-
-# test = Year(2026)
-# test.append(Month('january'))
-# test.append(Month('february'))
-# test.append(Month('march'))
-# print(test[-1].month, test[-1].year_num)
-# test[-1] = Month('april')
-# test.append(Month('march'))
-# print(test)
-# print(test[0])
+    def get_year_num(self):
+        return self.number
+    
+    def get_month_names(self):
+        return self.__claimed_months

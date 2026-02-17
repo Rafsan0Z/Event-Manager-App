@@ -95,7 +95,6 @@ class YearList(MutableSequence):
                     for event in date:
                         #print the event here
                         print(f'({event_index}) {event}')
-                        new_event = Event(event.event_name, event.time_string, event.duration_string, event.notes_string)
                         return_list.append(event)
                         event_index += 1
         return return_list

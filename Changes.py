@@ -8,6 +8,7 @@ class Change(ABC):
         self.load_event_info(event)
         self.db_handler = db_handler
         self.set_index()
+        self.undone = False
 
     def set_index(self):
         self.year_list = self.db_handler.getYearList()
@@ -48,7 +49,24 @@ class Add(Change):
 
     def undo(self):
         # check if the yearlist has this event and if so remove it:
-        pass
+        year_list = self.db_handler.getYearList()
+        years = year_list.search_years(self.year)
+        if not years: return
+        for year in years:
+            months = year.search_months(self.month)
+            if not months: return
+            for month in months:
+                dates = month.search_dates(self.day, self.date)
+                if not dates: return
+                for date in dates:
+                    removed_event = None
+                    for event in date:
+                        if self.event == event:
+                            removed_event = event
+                            break
+                    if removed_event:
+                        pass #remove here
+                        
         
     def redo(self):
         #check if the yearlist doesn't have this event and if so, add it:

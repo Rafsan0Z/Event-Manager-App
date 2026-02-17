@@ -18,6 +18,9 @@ class Day(EventList):
         )
         result += super().__str__()
         return result
+    
+    def get_day_name(self):
+        return self.day_name
 
 
 class Date(Day):
@@ -65,6 +68,9 @@ class Date(Day):
             date = self.date_num
         )
         return new_top_line + without_top_line
+    
+    def get_date_num(self):
+        return self.date_num
 
 
 #test = Day('January',"Saturday",31,2026)
