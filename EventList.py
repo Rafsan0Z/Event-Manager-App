@@ -5,8 +5,9 @@ from Event import Event
 
 class EventList(MutableSequence):
     
-    def __init__(self):
+    def __init__(self, ordered = True):
         self.events = []
+        self.ordered = ordered
 
     def __len__(self):
         return len(self.events)
@@ -45,7 +46,8 @@ class EventList(MutableSequence):
     def insert(self, i, event):
         self.check_event_type(event)
         if self.does_event_exist(event): return
-        index = self.__insert_pos(event)
+        if self.ordered: index = self.__insert_pos(event)
+        else: index = i
         self.events.insert(index, event)
 
     def add_event(self, event):

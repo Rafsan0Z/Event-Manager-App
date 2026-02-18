@@ -87,15 +87,15 @@ class EditName(Change):
         super().__init__(event, db_handler)
         self.new_name = name
         self.old_name = self.event.event_name
+        self.redo()
 
     def undo(self):
-        year_list = self.db_handler.getYearList()
-        # find the event based on the yearlist and if it exists:
-        # see if the event name is the new_name and if so:
-        # set event's name equal to self.old_name
+        self.event.event_name = self.old_name
+        self.done = False
 
     def redo(self):
-        pass
+        self.event.event_name = self.new_name
+        self.done = True
 
     def __str__(self):
         result = super().__str__()
@@ -111,12 +111,15 @@ class EditTime(Change):
         super().__init__(event, db_handler)
         self.new_start_time = start_time
         self.old_start_time = event.time_string
+        self.redo()
 
     def undo(self):
-        year_list = self.db_handler.getYearlist()
+        self.event.set_time_string(self.old_start_time)
+        self.done = False
     
     def redo(self):
-        pass
+        self.event.set_time_string(self.new_start_time)
+        self.done = True
 
     def __str__(self):
         result = super().__str__()
@@ -133,12 +136,15 @@ class EditDuration(Change):
         super().__init__(event, db_handler)
         self.new_duration = duration
         self.old_duration = event.duration_string
+        self.redo()
 
     def undo(self):
-        year_list = self.db_handler.getYearlist()
+        self.event.set_duration_string(self.old_duration)
+        self.done = False
     
     def redo(self):
-        pass
+        self.event.set_duration_string(self.new_duration)
+        self.done = True
 
     def __str__(self):
         result = super().__str__()

@@ -18,6 +18,73 @@ def start():
         screen = screen.main()
     if ChangeScreen.changeList: FinalChanges()
 
+class TimeProcessor:
+
+    def __init__(self, collect = True):
+        self.collect_all = collect
+
+    def process_time_input(self):
+        hour = input("Now you will enter the time in (am/pm) mode. First enter the hour number (for 12:30pm it would be 12): ").lower().strip()
+        mins = input("Now enter the minutes number (for 12:30pm it would be 30). If the time has no minutes leave it blank (for 12pm or 12:00pm): ").lower().strip()
+        portion = input("Now enter either am or pm: ").lower().strip()
+        return f'{hour}:{mins}{portion}' if mins else f'{hour}{portion}'
+
+    def process_duration_input(self):
+        hours = input("Enter the number of hours: ").lower().strip()
+        while not hours.isdigit() and hours != '':
+            hours = input("Please enter an integer for hours. You can also leave it blank: ").lower().strip()
+        mins = input("Enter the number of mins (not including the hours): ").lower().strip()
+        while not mins.isdigit() and mins != '':
+            mins = input("Please enter an integer for mins. You can also leave it blank: ").lower().strip()
+        if hours and mins:
+            return f'{hours} hours and {mins} mins'
+        elif hours:
+            return f'{hours} hours'
+        else:
+            return ''
+
+    def process_day_input(self):
+        day_candidate = input("Now enter the day name in full (caps incensitive): ").lower().strip()
+        day_correct = False
+        while not day_correct:
+            try:
+                is_day(day_candidate)
+            except NotRealDayException as n:
+                if not self.collect_all:
+                    return None
+                day_candidate = input("Please enter a proper day name: ").lower().strip()
+            else:
+                day_correct = True
+        return day_candidate
+    
+    def process_date_input(self):
+        date = input("Now enter the date number: ").lower().strip()
+        if not self.collect_all and date == '': return None
+        while date == '' or not date.isdigit() or int(date) > 31 or int(date) < 0:
+            date = input("Please enter a proper date: ").lower().strip()
+        return int(date)
+
+    def process_month_input(self):
+        month_candidate = input("Now enter the month name in full (case incensitive): ").lower().strip()
+        month_correct = False
+        while not month_correct:
+            try:
+                test_month(month_candidate)
+            except BadMonthException as b:
+                if not self.collect_all:
+                    return None
+                month_candidate = input("Please enter a correct month name: ").lower().strip()
+            else:
+                month_correct = True
+        return month_candidate
+
+    def process_year_input(self):
+        year_num = input("Finally, enter the year number: ").lower().strip()
+        if not self.collect_all and year_num == '': return None
+        while year_num == '' or not year_num.isdigit() or int(year_num) <= 2024:
+            year_num = input("Please enter a valid year and no year before 2024: ").lower().strip()
+        return int(year_num)
+
 class Screen(ABC):
 
     @abstractmethod
@@ -277,70 +344,15 @@ class ViewFilteredEventsScreen(Screen):
 
 class AddEventsScreen(ChangeScreen):
 
-    def process_time_input(self):
-        hour = input("Now you will enter the time in (am/pm) mode. First enter the hour number (for 12:30pm it would be 12): ").lower().strip()
-        mins = input("Now enter the minutes number (for 12:30pm it would be 30). If the time has no minutes leave it blank (for 12pm or 12:00pm): ").lower().strip()
-        portion = input("Now enter either am or pm: ").lower().strip()
-        return f'{hour}:{mins}{portion}' if mins else f'{hour}{portion}'
-
-    def process_duration_input(self):
-        hours = input("Enter the number of hours: ").lower().strip()
-        while not hours.isdigit() and hours != '':
-            hours = input("Please enter an integer for hours. You can also leave it blank: ").lower().strip()
-        mins = input("Enter the number of mins (not including the hours): ").lower().strip()
-        while not mins.isdigit() and mins != '':
-            mins = input("Please enter an integer for mins. You can also leave it blank: ").lower().strip()
-        if hours and mins:
-            return f'{hours} hours and {mins} mins'
-        elif hours:
-            return f'{hours} hours'
-        else:
-            return ''
-
-    def process_day_input(self):
-        day_candidate = input("Now enter the day name in full (caps incensitive): ").lower().strip()
-        day_correct = False
-        while not day_correct:
-            try:
-                is_day(day_candidate)
-            except NotRealDayException as n:
-                day_candidate = input("Please enter a proper day name: ").lower().strip()
-            else:
-                day_correct = True
-        return day_candidate
-    
-    def process_date_input(self):
-        date = input("Now enter the date number: ").lower().strip()
-        while date == '' or not date.isdigit() or int(date) > 31 or int(date) < 0:
-            date = input("Please enter a proper date: ").lower().strip()
-        return int(date)
-
-    def process_month_input(self):
-        month_candidate = input("Now enter the month name in full (case incensitive): ").lower().strip()
-        month_correct = False
-        while not month_correct:
-            try:
-                test_month(month_candidate)
-            except BadMonthException as b:
-                month_candidate = input("Please enter a correct month name: ").lower().strip()
-            else:
-                month_correct = True
-        return month_candidate
-
-    def process_year_input(self):
-        year_num = input("Finally, enter the year number: ").lower().strip()
-        while year_num == '' or not year_num.isdigit() or int(year_num) <= 2024:
-            year_num = input("Please enter a valid year and no year before 2024: ").lower().strip()
-        return int(year_num)
-
     def main(self):
+        processor = TimeProcessor()
         event_name = input("First enter your Event name: ").strip()
-        time = self.process_time_input()
-        duration = self.process_duration_input()
-        day_name = self.process_day_input()
-        date_num = self.process_date_input() #output is int
-        month_name = self.process_month_input()
-        year_num = self.process_year_input()
+        time = processor.process_time_input()
+        duration = processor.process_duration_input()
+        day_name = processor.process_day_input()
+        date_num = processor.process_date_input() #output is int
+        month_name = processor.process_month_input()
+        year_num = processor.process_year_input()
 
         try:
             test_day(day_name, month_name, year_num, date_num)
@@ -365,30 +377,21 @@ class AddEventsScreen(ChangeScreen):
 
 class EditEventsScreen(Screen):
 
-    def filter_message(self, **options):
-        result = "Displaying events based on: "
-        if options.get('year', None):
-            result +=  f'the Year {options.get('year')} |'
+    def filter_message(self, year_num = None, month_name = None, day_name = None, date_num = None):
+        result = 'Disaplying events based on: '
+        if year_num:
+            result += f'the Year {year_num}| '
         else: result += 'Any Year| '
-        if options.get('month', None):
-            result += 'the month of ' + options.get('month') + "| "
+        if month_name:
+            result += f'the Month of {month_name}| '
         else: result += 'Any Month| '
-        if options.get('day', None):
-            result += 'On ' + options.get('day') + "|"
-        else: result += "Any Day|"
+        if day_name:
+            result += f'{day_name}| '
+        else: result += 'Any Day| '
+        if date_num:
+            result += f'the {date_num}th: '
+        else: result += 'Any Date: '
         print(result)
-    
-    def process_time_item(self, time_unit, test_func = None):
-        output = input(time_unit + ": ").lower().strip()
-        correct_input = False
-        while test_func and output != '' and not correct_input:
-            try:
-                test_func(output)
-            except Exception as e:
-                output = input("Input a correct " + time_unit + " or leave it blank!! " + time_unit + ": ").lower().strip()
-            else:
-                correct_input = True
-        return output
 
     def print_options(self):
         print("Now pick from one of the following edit choices: ")
@@ -410,7 +413,7 @@ class EditEventsScreen(Screen):
             case '3':
                 return EditEventDuration(event)
             case '4':
-                pass
+                return EditEventNotes(event)
             case 'b':
                 return MainScreen()
             case _:
@@ -421,22 +424,21 @@ class EditEventsScreen(Screen):
         choice = ''
 
         while choice == '' and choice != 'b':
+            processor = TimeProcessor(False)
             print("We'll edit the chosen event here, only one event can be edited at a time [for now!]")
             print("Enter the filter values, leave a filter empty if you want all events under that fileter")
-            year = self.process_time_item("Year")
-            month = self.process_time_item('Month', test_month)
-            day = self.process_time_item('Day', is_day)
-            date = self.process_time_item('Date') #Assumes I enter the correct date for now!
-            year = int(year) if year else None
-            date = int(date) if date else None
+            year = processor.process_year_input() 
+            month = processor.process_month_input() 
+            day = processor.process_day_input() 
+            date = processor.process_date_input() 
             #test_day(day, month, year, date)
-            self.filter_message(year=year,month=month,day=day)
+            self.filter_message(year, month, day, date)
 
             search_list = self.db_handler.getYearList().grab_events(year, month, day, date)
-
+            
             choice = input("Now pick one of the following events by entering the number. Enter B to go back to the Main Screen. Enter anything else to reset your filters: ").lower().strip()
-            #if choice == 'b': return MainScreen()
-            if choice.isdigit():
+            if choice == 'b': return MainScreen()
+            elif choice.isdigit():
                 self.clear_screen()
                 print(f'You have chosen the following event: \n {search_list[int(choice) - 1]}')
                 self.print_options()
@@ -481,6 +483,12 @@ class EditEventDuration(ChangeScreen):
         input("Change is queued! Press anything to go back to Main Screen ")
         return MainScreen()
 
+
+class EditEventNotes(ChangeScreen):
+
+    def main(self):
+        input("This option is still under construction, try again later ")
+        return EditEventsScreen()
 
 class PlotScreen(Screen):
 

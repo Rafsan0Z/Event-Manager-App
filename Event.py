@@ -94,11 +94,19 @@ class Event:
     def get_duration_string(self):
         return self.duration_string
     
+    def set_duration_string(self, duration_string):
+        self.duration_string = duration_string
+        self.process_duration_string()
+
     def get_time(self):
         pass
 
     def get_time_string(self):
         return self.time_string
+    
+    def set_time_string(self, time_string):
+        self.time_string = time_string
+        self.process_time_string()
     
     def get_notes(self):
         return self.notes

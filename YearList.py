@@ -90,7 +90,7 @@ class YearList(MutableSequence):
         return self.give_years()
     
     def grab_events(self, year_num = None, month_name = None, day_name = None, date_num = None): #send this to yearlist
-        return_list = EventList()
+        return_list = EventList(ordered=False)
         event_index = 1
         for year in self.search_years(year_num):
             #print the year num here
