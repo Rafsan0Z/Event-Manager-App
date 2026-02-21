@@ -1,0 +1,8 @@
+VerticalGroup{
+    height: 100%;
+    align: center middle;
+}
+
+Button{
+    width: 40;
+}
