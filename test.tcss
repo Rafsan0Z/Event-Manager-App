@@ -1,8 +1,17 @@
-VerticalGroup{
+Screen{
     height: 100%;
     align: center middle;
 }
 
-Button{
+Button, Static{
     width: 40;
+}
+
+Screen > Static{
+    border: wide white;
+}
+
+Header{
+    align: center top;
+    dock: top;
 }
