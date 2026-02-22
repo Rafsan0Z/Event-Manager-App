@@ -1,11 +1,11 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, Button, Label, Static, Input
+from textual.widgets import Footer, Header, Button, Label, Static, Input, Select
 from textual.containers import HorizontalGroup, VerticalScroll, VerticalGroup, Center
 from textual.screen import Screen
 from textual import on
 from DocHandler import DocFactory
 from DBHandler import DBFactory
-from DataFuncs import InfoFuncs, StatFuncs, PlotFuncs
+from DataFuncs import DateFuncs, InfoFuncs, StatFuncs, PlotFuncs
 
 class DefaultScreen(Screen):
 
@@ -65,21 +65,174 @@ class ViewEventScreen(DefaultScreen):
     
     def compose(self) -> ComposeResult:
         yield Header()
-        yield self.ExitButton()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Year: "),
+                Input(type="integer", max_length=4)
+            ),
+            HorizontalGroup(
+                Label("Month: "),
+                Input(type="text")
+            ),
+            HorizontalGroup(
+                Label("Date: "),
+                Input(type="integer", max_length=2)
+            ),
+            self.ExitButton()
+        )
         yield Footer()
 
 class AddEventScreen(DefaultScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.datefuncs = DateFuncs(self.app.handler)
+
+    @on(Select.Changed, "#months")
+    def edit_dates(self, event: Select.Changed) -> None:
+        month_select = self.query_one("#months", Select)
+        max_dates = self.datefuncs.getMaxDays(month_select.value)
+        date_select = self.query_one("#dates", Select)
+        date_select.set_options( [(str(date), date) for date in range(1, max_dates + 1)] )
+
+    @on(Select.Changed, "#years")
+    def find_day(self, event: Select.Changed) -> None:
+        pass
+
+    @on(Select.Changed, "#days")
+    def find_dates(self, event: Select.Changed) -> None:
+        year_select = self.query_one("#years", Select)
+        month_select = self.query_one("#months", Select)
+        if year_select.value == Select.NULL or month_select.value == Select.NULL or event.value == Select.NULL:
+            return
+        year = year_select.value
+        month = month_select.value
+        day = event.value
+        filtered_dates = self.datefuncs.getListofDates(year, month, day)
+        date_select = self.query_one('#dates', Select)
+        date_select.set_options( [(str(date), date) for date in filtered_dates] )
+
+
     def compose(self) -> ComposeResult:
+        mins = range(1,61)
+        hours = range(1,11)
         yield Header()
-        yield self.ExitButton()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Year: "),
+                Select( [(str(year), year) for year in range(2024, 2076) ] , id="years")
+            ),
+            HorizontalGroup(
+                Label("Month: "),
+                Select([ (f'{month[0].upper()}{month[1:]}', month) for month in self.datefuncs.getFullListofMonths() ], id="months")
+            ),
+            HorizontalGroup(
+                Label("Date: "),
+                Select( [(date, date) for date in range(1,32)], id="dates")
+            ),
+            HorizontalGroup(
+                Label("Day: "),
+                Select( [(f'{day[0].upper()}{day[1:]}', day) for day in self.datefuncs.getFullListofDays() ], id="days")
+            ),
+            HorizontalGroup(
+                Label("Event name: "),
+                Input(type="text")
+            ),
+            HorizontalGroup(
+                Label("Duration: "),
+                Select((str(hour), hour) for hour in hours),
+                Label("hours and"),
+                Select((str(min), min) for min in mins),
+                Label("mins")
+            ),
+            HorizontalGroup(
+                Label("Time: "),
+                Input(type="integer", max_length=2),
+                Label(":"),
+                Input(type="integer", max_length=2, value="00"),
+                Select([("am", 1), ("pm", 2)])
+            ),
+            self.ExitButton()
+        )
         yield Footer()
 
 class EditEventScreen(DefaultScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.infofuncs = InfoFuncs(self.app.handler)
+
+    @on(Select.Changed, ".time_input")
+    def update_time(self, event: Select.Changed) -> None:
+        year_select = self.query_one("#years", Select)
+        month_select = self.query_one("months", Select)
+
+        if year_select.value and month_select.value:
+            year_pick = year_select.value
+            month_pick = month_select.value
+            new_dates = []
+            dates_select = self.query_one("#dates", Select)
+            dates_select.set_options( [(f"")] )
+        elif year_select.value:
+            new_months = self.infofuncs.getListofMonths(int(event.value))
+            month_select.set_options( [(month, month) for month in new_months] )
+        elif month_select.value:
+            pass
+        
+
+
     def compose(self) -> ComposeResult:
+        mins = range(1,61)
+        hours = range(1,11)
         yield Header()
-        yield self.ExitButton()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Year: "),
+                Select( [(str(year), str(year)) for year in self.infofuncs.getListofYears()], id="years", classes="time-input")
+            ),
+            HorizontalGroup(
+                Label("Month: "),
+                Select([
+                    ("January", 1),
+                    ("February", 2),
+                    ("March", 3),
+                    ("April", 4),
+                    ("May", 5),
+                    ("June", 6),
+                    ("July", 7),
+                    ("August", 8),
+                    ("September", 9),
+                    ("October", 10),
+                    ("November", 11),
+                    ("December", 12)
+                ], id="months", classes="time-input")
+            ),
+            HorizontalGroup(
+                Label("Date: "),
+                Select([], id="dates")
+            ),
+            HorizontalGroup(
+                Label("Event name: "),
+                Input(type="text")
+            ),
+            HorizontalGroup(
+                Label("Duration: "),
+                Select((str(hour), str(hour)) for hour in hours),
+                #Input(type="integer", max_length=2),
+                Label("hours and"),
+                Select((str(min), str(min)) for min in mins),
+                #Input(type="integer", max_length=2),
+                Label("mins")
+            ),
+            HorizontalGroup(
+                Label("Time: "),
+                Input(type="integer", max_length=2),
+                Label(":"),
+                Input(type="integer", max_length=2, value="00"),
+                Select([("am", 1), ("pm", 2)])
+            ),
+            self.ExitButton()
+        )
         yield Footer()
 
 class PlotScreen(DefaultScreen):

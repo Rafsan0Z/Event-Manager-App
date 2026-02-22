@@ -1,11 +1,48 @@
 from DBHandler import isHandler
-from datetime import datetime, timedelta as dur
+from datetime import datetime, date, timedelta as dur
 from dotenv import load_dotenv
 from EventExceptions import month_list, date_dict, days_list
 import numpy as np
 import matplotlib.pyplot as plt
+import calendar
 import math
 import os
+
+class DateFuncs:
+
+    def __init__(self, db_handler):
+        if isHandler(db_handler):
+            self.year_list = db_handler.getYearList()
+
+    def getMaxDays(self, month):
+        return date_dict[month.lower().strip()]
+
+    def getListofYears(self):
+        result = []
+        for year in self.year_list:
+            result.append(year.number)
+        return result
+    
+    def getListofMonths(self, year_num):
+        result = []
+        for year in self.year_list.search_years(year_num):
+            for month in year:
+                result.append(month.month)
+        return result
+    
+    def getFullListofMonths(self):
+        return month_list
+    
+    def getFullListofDays(self):
+        return days_list
+    
+    def getListofDates(self, year_num, month_name, day_name):
+        result = []
+        for day in range(1, date_dict[month_name.lower()]):
+            target_date = date(year_num, month_list.index(month_name.lower()) + 1, day)
+            if target_date.weekday() == days_list.index(day_name.lower()):
+                result.append(day)
+        return result
 
 class InfoFuncs:
 
@@ -37,6 +74,7 @@ class InfoFuncs:
     
     def getNumofEvents(self):
         return self.year_list.num_events()
+    
     
     def getTodaysEvents(self):
         today_year = datetime.now().year

@@ -14,8 +14,12 @@ Button{
     width: 40;
 }
 
+Select{
+    width: 25;
+}
+
 Screen > VerticalScroll > HorizontalGroup > Input{
-    width: auto
+    width: auto;
 }
 
 Screen > Static, Screen > VerticalScroll > Static{
