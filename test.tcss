@@ -1,10 +1,21 @@
 Screen, Screen > VerticalScroll{
     height: 100%;
+    width: 100%;
+    align: center middle;
+}
+
+HorizontalGroup{
+    height: auto;
+    width: auto;
     align: center middle;
 }
 
 Button{
     width: 40;
+}
+
+Screen > VerticalScroll > HorizontalGroup > Input{
+    width: auto
 }
 
 Screen > Static, Screen > VerticalScroll > Static{

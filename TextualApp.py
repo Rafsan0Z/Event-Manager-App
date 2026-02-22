@@ -1,5 +1,5 @@
 from textual.app import App, ComposeResult
-from textual.widgets import Footer, Header, Button, Digits, Static
+from textual.widgets import Footer, Header, Button, Label, Static, Input
 from textual.containers import HorizontalGroup, VerticalScroll, VerticalGroup, Center
 from textual.screen import Screen
 from textual import on
@@ -105,6 +105,14 @@ class PlotEventScreen(DefaultScreen):
     def plot_screen_by_year(self):
         self.app.push_screen(ByYear())
 
+    @on(Button.Pressed, "#by_month")
+    def plot_screen_by_month(self):
+        self.app.push_screen(ByMonth())
+
+    @on(Button.Pressed, "#by_date")
+    def plot_screen_by_date(self):
+        self.app.push_screen(ByDate())
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Button("Plot Events By Year", id="by_year")
@@ -118,6 +126,14 @@ class PlotTimeScreen(DefaultScreen):
     @on(Button.Pressed, "#by_year")
     def plot_screen_by_year(self):
         self.app.push_screen(ByYear())
+
+    @on(Button.Pressed, "#by_month")
+    def plot_screen_by_month(self):
+        self.app.push_screen(ByMonth())
+
+    @on(Button.Pressed, "#by_date")
+    def plot_screen_by_date(self):
+        self.app.push_screen(ByDate())
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -161,6 +177,38 @@ class ByMonth(DefaultScreen):
 
     def __init__(self):
         super().__init__()
+    
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Year: "),
+                Input(type="integer", max_length=4)
+            ),
+            Button("Show Plot"),
+            Button("Save Plot"),
+            self.ExitButton()
+        )
+        yield Footer()
+
+class ByDate(DefaultScreen):
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Year: "),
+                Input(type="integer", max_length=4)
+            ),
+            HorizontalGroup(
+                Label("Month: "),
+                Input(type="text")
+            ),
+            Button("Show Plot"),
+            Button("Save Plot"),
+            self.ExitButton()
+        )
+        yield Footer()
 
 class InfoScreen(DefaultScreen):
 
