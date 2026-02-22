@@ -173,8 +173,7 @@ class PlotFuncs:
         plt.xlabel('Years')
         plt.ylabel('# of Events')
         plt.title('Event Plot')
-        plt.show()
-        return fig
+        return plt, fig
     
     def plot_events_month(self, year_num = None):
         xlist = []
@@ -194,8 +193,7 @@ class PlotFuncs:
         plt.xlabel('Months')
         plt.ylabel('# of Events')
         plt.title('Event Plot')
-        plt.show()
-        return fig
+        return plt, fig
     
     def plot_events_date(self, year_num = None, month_name = None):
         xlist = []
@@ -221,8 +219,7 @@ class PlotFuncs:
         plt.ylabel('# of Events')
         plt.title('Event Plot')
         plt.tight_layout()
-        plt.show()
-        return fig
+        return plt, fig
 
     def plot_time_year(self):
         time_list = []
@@ -241,8 +238,7 @@ class PlotFuncs:
         plt.xlabel('Years')
         plt.ylabel(f'Time in {unit}')
         plt.title('Event Time Plot')
-        plt.show()
-        return fig
+        return plt, fig
 
     def plot_time_month(self, year_num = None):
         time_list = []

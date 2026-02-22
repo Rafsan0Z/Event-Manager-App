@@ -1,14 +1,15 @@
-Screen{
+Screen, Screen > VerticalScroll{
     height: 100%;
     align: center middle;
 }
 
-Button, Static{
+Button{
     width: 40;
 }
 
-Screen > Static{
+Screen > Static, Screen > VerticalScroll > Static{
     border: wide white;
+    width: auto;
 }
 
 Header{

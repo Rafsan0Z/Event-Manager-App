@@ -3,8 +3,18 @@ from textual.widgets import Footer, Header, Button, Digits, Static
 from textual.containers import HorizontalGroup, VerticalScroll, VerticalGroup, Center
 from textual.screen import Screen
 from textual import on
+from DocHandler import DocFactory
+from DBHandler import DBFactory
+from DataFuncs import InfoFuncs, StatFuncs, PlotFuncs
 
 class DefaultScreen(Screen):
+
+    def __init__(self):
+        super().__init__()
+        if len(self.app.screen_stack) > 1:
+            self.parent_screen = self.app.screen_stack[-1]
+        else:
+            self.parent_screen = None
 
     @on(Button.Pressed, "#back")
     def back(self):
@@ -72,32 +82,121 @@ class EditEventScreen(DefaultScreen):
         yield self.ExitButton()
         yield Footer()
 
-class PlotEventScreen(DefaultScreen):
+class PlotScreen(DefaultScreen):
+
+    @on(Button.Pressed, "#event_plot")
+    def plot_events(self):
+        self.app.push_screen(PlotEventScreen())
+
+    @on(Button.Pressed, "#time_plot")
+    def plot_time(self):
+        self.app.push_screen(PlotTimeScreen())
 
     def compose(self) -> ComposeResult:
         yield Header()
+        yield Button("Plot by Events", id="event_plot")
+        yield Button("Plot by Time", id="time_plot")
         yield self.ExitButton()
         yield Footer()
+
+class PlotEventScreen(DefaultScreen):
+
+    @on(Button.Pressed, "#by_year")
+    def plot_screen_by_year(self):
+        self.app.push_screen(ByYear())
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Button("Plot Events By Year", id="by_year")
+        yield Button("Plot Events By Month", id="by_month")
+        yield Button("Plot Events By Date", id="by_date")
+        yield self.ExitButton()
+        yield Footer()
+
+class PlotTimeScreen(DefaultScreen):
+
+    @on(Button.Pressed, "#by_year")
+    def plot_screen_by_year(self):
+        self.app.push_screen(ByYear())
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield Button("Plot Time By Year", id="by_year")
+        yield Button("Plot Time By Month", id="by_month")
+        yield Button("Plot Time By Date", id="by_date")
+        yield self.ExitButton()
+        yield Footer()
+
+
+class ByYear(DefaultScreen):
+
+    def __init__(self):
+        super().__init__()
+        if isinstance(self.parent_screen, PlotEventScreen):
+            self.plot_func = PlotFuncs(self.app.handler).plot_events_year
+        elif isinstance(self.parent_screen, PlotTimeScreen):
+            self.plot_func = PlotFuncs(self.app.handler).plot_time_year
+
+    @on(Button.Pressed, "#show")
+    def show_plot(self):
+        plt, self.fig = self.plot_func()
+        plt.show()
+    
+    @on(Button.Pressed, "#save")
+    def save_plot(self):
+        if not self.fig:
+            self.fig = self.plot_func()[-1]
+        # save it here
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield VerticalScroll(
+            Button(f"Show Plot", id="show"),
+            Button("Save Plot", id="save"),
+            self.ExitButton()
+        )
+        yield Footer()
+
+class ByMonth(DefaultScreen):
+
+    def __init__(self):
+        super().__init__()
 
 class InfoScreen(DefaultScreen):
 
+    def __init__(self):
+        super().__init__()
+        self.infofuncs = InfoFuncs(self.app.handler)
+        self.statfuncs = StatFuncs(self.app.handler)
+
     def compose(self) -> ComposeResult:
+        max_year, max_year_count = self.statfuncs.find_max_event_year()
+        max_month, max_month_count = self.statfuncs.find_max_event_month()
+        max_date, max_date_count = self.statfuncs.find_max_event_date()
         yield Header()
-        yield Static("Name of the document: ")
-        yield Static("Number of Years: ")
-        yield Static("Year with the most events: ")
-        yield Static("Number of Months: ")
-        yield Static("Month with the most events: ")
-        yield Static("Number of Days: ")
-        yield Static("Days with the most events: ")
-        yield Static("Number of Events: ")
-        yield Static("Total time of events: ")
-        yield Static("Last modified time: ")
-        yield Static("Github Page: ")
-        yield self.ExitButton()
+        yield VerticalScroll(
+            Static(f"Name of the document: {self.infofuncs.getDocName()}"),
+            Static(f"Number of Years: {self.infofuncs.getNumofYears()}"),
+            Static(f"Year with the most events: {max_year.number} with {max_year_count} events"),
+            Static(f"Number of Months: {self.infofuncs.getNumofMonths()}"),
+            Static(f"Month with the most events: {max_month.month} of {max_month.year_num} with {max_month_count} events"),
+            Static(f"Number of Days: {self.infofuncs.getNumofDays()}"),
+            Static(f"Days with the most events: {max_date.day_name} the {max_date.date_num}, {max_date.month_name} of {max_date.year_num} with {max_date_count} events"),
+            Static(f"Number of Events: {self.infofuncs.getNumofEvents()}"),
+            Static(f"Total time of events: {self.statfuncs.total_time()}"),
+            Static(f"Last modified time: {self.infofuncs.getLastModTime()}"),
+            Static(f"Github Page: {self.infofuncs.getGithubLink()}"),
+            self.ExitButton()
+        )
         yield Footer()
 
-class TestApp(App):
+class EventManager(App):
+
+    def __init__(self):
+        super().__init__()
+        DocFactory()
+        self.handler = DBFactory()
+
 
     CSS_PATH = "test.tcss"
     LIGHT_MODE = 'textual-light'
@@ -110,7 +209,7 @@ class TestApp(App):
         "view": ViewEventScreen,
         "add": AddEventScreen,
         "edit": EditEventScreen,
-        "plot": PlotEventScreen,
+        "plot": PlotScreen,
         "info": InfoScreen
     }
 
@@ -122,4 +221,4 @@ class TestApp(App):
             self.DARK_MODE if self.theme == 'textual-light' else self.LIGHT_MODE
         )
     
-TestApp().run()
+EventManager().run()
