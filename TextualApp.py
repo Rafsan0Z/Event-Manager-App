@@ -1,10 +1,11 @@
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header, Button, Label, Static, Input, Select
-from textual.containers import HorizontalGroup, VerticalScroll, VerticalGroup, Center
+from textual.containers import HorizontalGroup, VerticalScroll, VerticalGroup, Center, Container
 from textual.screen import Screen
 from textual import on
 from DocHandler import DocFactory
 from DBHandler import DBFactory
+from Changes import ChangeList
 from DataFuncs import DateFuncs, InfoFuncs, StatFuncs, PlotFuncs
 
 class DefaultScreen(Screen):
@@ -33,23 +34,23 @@ class MainScreen(Screen):
 
     @on(Button.Pressed, "#view_events")
     def view_screen(self):
-        self.app.push_screen("view")
+        self.app.push_screen(ViewEventScreen())
 
     @on(Button.Pressed, "#add_events")
     def add_screen(self):
-        self.app.push_screen("add")
+        self.app.push_screen(AddEventScreen())
 
     @on(Button.Pressed, "#edit_events")
     def edit_screen(self):
-        self.app.push_screen("edit")
+        self.app.push_screen(EditEventScreen())
 
     @on(Button.Pressed, "#plot_events")
     def plot_screen(self):
-        self.app.push_screen("plot")
+        self.app.push_screen(PlotEventScreen())
 
     @on(Button.Pressed, "#info")
     def info_screen(self):
-        self.app.push_screen("info")
+        self.app.push_screen(InfoScreen())
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -88,71 +89,133 @@ class AddEventScreen(DefaultScreen):
         super().__init__()
         self.datefuncs = DateFuncs(self.app.handler)
 
-    @on(Select.Changed, "#months")
-    def edit_dates(self, event: Select.Changed) -> None:
-        month_select = self.query_one("#months", Select)
-        max_dates = self.datefuncs.getMaxDays(month_select.value)
-        date_select = self.query_one("#dates", Select)
-        date_select.set_options( [(str(date), date) for date in range(1, max_dates + 1)] )
+    def find_missing_inputs(self, main_scroll: VerticalScroll) -> list:
+        not_entered = []
+        year = main_scroll.query_one("#years", Select).value
+        if year == Select.NULL: not_entered.append("Year")
+        month = main_scroll.query_one("#months", Select).value
+        if month == Select.NULL: not_entered.append("Month")
+        date = main_scroll.query_one("#dates", Select).value
+        if date == Select.NULL: not_entered.append("Date")
+        day = main_scroll.query_one("#days", Select).value
+        if day == Select.NULL: not_entered.append("Day Name")
 
-    @on(Select.Changed, "#years")
-    def find_day(self, event: Select.Changed) -> None:
-        pass
+        event_name = main_scroll.query_one("#event_name", Input).value
+        if not event_name: not_entered.append("Event name")
+        hour_duration = main_scroll.query_one("#hours_duration", Select).value
+        min_duration = main_scroll.query_one("#mins_duration", Select).value
+        if hour_duration == Select.NULL or min_duration == Select.NULL: not_entered.append("Completed duration info")
+        hour_time = main_scroll.query_one("#hours_time", Select).value
+        min_time = main_scroll.query_one("#mins_time", Select).value
+        period_time = main_scroll.query_one("#am_pm", Select).value
+        if hour_time == Select.NULL or min_time == Select.NULL or period_time == Select.NULL: not_entered.append("Completed time info")
+        return not_entered
 
-    @on(Select.Changed, "#days")
-    def find_dates(self, event: Select.Changed) -> None:
+    @on(Select.Changed, ".times")
+    def update_times(self):
         year_select = self.query_one("#years", Select)
         month_select = self.query_one("#months", Select)
-        if year_select.value == Select.NULL or month_select.value == Select.NULL or event.value == Select.NULL:
-            return
+        date_select = self.query_one("#dates", Select)
+        day_select = self.query_one("#days", Select)
         year = year_select.value
         month = month_select.value
-        day = event.value
-        filtered_dates = self.datefuncs.getListofDates(year, month, day)
-        date_select = self.query_one('#dates', Select)
-        date_select.set_options( [(str(date), date) for date in filtered_dates] )
+        day = day_select.value
+        date = date_select.value
 
+        if year != Select.NULL and month != Select.NULL and date != Select.NULL and day != Select.NULL:
+            return
+        if year != Select.NULL and month != Select.NULL and date != Select.NULL:
+            only_day = self.datefuncs.getDay(year, month, date)
+            day_select.set_options( [(only_day, only_day)] )
+            return
+        if year != Select.NULL and month != Select.NULL:
+            if day != Select.NULL:
+                filtered_dates = self.datefuncs.getListofDates(year, month, day)
+                date_select.set_options( [(str(date), date) for date in filtered_dates] )
+                return 
+        if month != Select.NULL:
+            max_dates = self.datefuncs.getMaxDays(month_select.value)
+            date_select.set_options( [(str(date), date) for date in range(1, max_dates + 1)] )
+
+    @on(Button.Pressed, '#enter')
+    async def enter(self) -> None:
+        main_scroll = self.query_one("#main", VerticalScroll)
+        for label in main_scroll.query(".errors"): await label.remove()
+        if main_scroll.query_one_optional("#error_label"): await main_scroll.query_one_optional("#error_label").remove()
+
+        not_entered = self.find_missing_inputs(main_scroll)
+        
+        if len(not_entered):
+
+            label_list = [Label(entry, classes="errors", variant="error") for entry in not_entered]
+            
+            main_scroll.mount(
+                Label(f"You're missing the following: ", id="error_label"),
+                *label_list,
+            )
+        else:
+            #self.app.changeList.add_event_change()
+            pass
 
     def compose(self) -> ComposeResult:
-        mins = range(1,61)
+        mins = range(61)
         hours = range(1,11)
+        times = range(1,13)
         yield Header()
         yield VerticalScroll(
             HorizontalGroup(
                 Label("Year: "),
-                Select( [(str(year), year) for year in range(2024, 2076) ] , id="years")
+                Select( [
+                    (f'{year}', year) for year in range(2024, 2076) 
+                ] , id="years", classes="times")
             ),
             HorizontalGroup(
                 Label("Month: "),
-                Select([ (f'{month[0].upper()}{month[1:]}', month) for month in self.datefuncs.getFullListofMonths() ], id="months")
+                Select([ 
+                    (f'{month[0].upper()}{month[1:]}', month) for month in self.datefuncs.getFullListofMonths() 
+                ], id="months", classes="times")
             ),
             HorizontalGroup(
                 Label("Date: "),
-                Select( [(date, date) for date in range(1,32)], id="dates")
+                Select( [
+                    (date, date) for date in range(1,32)
+                ], id="dates", classes="times")
             ),
             HorizontalGroup(
                 Label("Day: "),
-                Select( [(f'{day[0].upper()}{day[1:]}', day) for day in self.datefuncs.getFullListofDays() ], id="days")
+                Select( [
+                    (f'{day[0].upper()}{day[1:]}', day) for day in self.datefuncs.getFullListofDays() 
+                ], id="days", classes='times')
             ),
             HorizontalGroup(
                 Label("Event name: "),
-                Input(type="text")
+                Input(type="text", id="event_name")
             ),
             HorizontalGroup(
                 Label("Duration: "),
-                Select((str(hour), hour) for hour in hours),
+                Select( [
+                    (f'{hour}', hour) for hour in hours
+                ], id="hours_duration", value=1),
                 Label("hours and"),
-                Select((str(min), min) for min in mins),
+                Select( [
+                    (f'{min}', min) for min in mins
+                ], id="mins_duration", value=0),
                 Label("mins")
             ),
             HorizontalGroup(
                 Label("Time: "),
-                Input(type="integer", max_length=2),
+                Select([
+                    (f'0{time}', time) if time < 10 else (f'{time}', time) for time in times
+                ], id="hours_time", value=12),
                 Label(":"),
-                Input(type="integer", max_length=2, value="00"),
-                Select([("am", 1), ("pm", 2)])
+                Select( [
+                    (f'0{min}', min) if min < 10 else (f'{min}', min) for min in mins[:-1]
+                ], id="mins_time", value=0),
+                Select([("AM", "am"), ("PM", "pm")], id="am_pm", value="pm")
             ),
-            self.ExitButton()
+            Button("Enter", id="enter"),
+            self.ExitButton(),
+            id="main"
         )
         yield Footer()
 
@@ -160,7 +223,7 @@ class EditEventScreen(DefaultScreen):
 
     def __init__(self):
         super().__init__()
-        self.infofuncs = InfoFuncs(self.app.handler)
+        self.datefuncs = DateFuncs(self.app.handler)
 
     @on(Select.Changed, ".time_input")
     def update_time(self, event: Select.Changed) -> None:
@@ -174,7 +237,7 @@ class EditEventScreen(DefaultScreen):
             dates_select = self.query_one("#dates", Select)
             dates_select.set_options( [(f"")] )
         elif year_select.value:
-            new_months = self.infofuncs.getListofMonths(int(event.value))
+            new_months = self.datefuncs.getListofMonths(int(event.value))
             month_select.set_options( [(month, month) for month in new_months] )
         elif month_select.value:
             pass
@@ -188,23 +251,14 @@ class EditEventScreen(DefaultScreen):
         yield VerticalScroll(
             HorizontalGroup(
                 Label("Year: "),
-                Select( [(str(year), str(year)) for year in self.infofuncs.getListofYears()], id="years", classes="time-input")
+                Select( [
+                    (f'{year}', year) for year in self.datefuncs.getListofYears()
+                ], id="years", classes="time-input")
             ),
             HorizontalGroup(
                 Label("Month: "),
                 Select([
-                    ("January", 1),
-                    ("February", 2),
-                    ("March", 3),
-                    ("April", 4),
-                    ("May", 5),
-                    ("June", 6),
-                    ("July", 7),
-                    ("August", 8),
-                    ("September", 9),
-                    ("October", 10),
-                    ("November", 11),
-                    ("December", 12)
+                    (f'{month[0].upper()}{month[1:]}', month) for month in self.datefuncs.getFullListofMonths()
                 ], id="months", classes="time-input")
             ),
             HorizontalGroup(
@@ -397,6 +451,7 @@ class EventManager(App):
         super().__init__()
         DocFactory()
         self.handler = DBFactory()
+        self.changeList = ChangeList()
 
 
     CSS_PATH = "test.tcss"
@@ -405,17 +460,8 @@ class EventManager(App):
     BINDINGS = [('d', 'dark_toggle', 'Toggle Dark Mode!')
     ]
 
-    SCREENS = {
-        "main": MainScreen,
-        "view": ViewEventScreen,
-        "add": AddEventScreen,
-        "edit": EditEventScreen,
-        "plot": PlotScreen,
-        "info": InfoScreen
-    }
-
     def on_mount(self):
-        self.push_screen("main")
+        self.push_screen(MainScreen())
 
     def action_dark_toggle(self) -> None:
         self.theme = (

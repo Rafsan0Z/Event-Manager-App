@@ -191,8 +191,13 @@ class ChangeList(MutableSequence):
     def insert(self, index, change):
         self.changes.insert(index, change)
 
-    def add_event_change(self, event_name, time_string, duration_string, year_num, month_name, day_name, date_num, db_handler):
-        new_event = DocumentedEvent(event_name, time_string, duration_string)
+    # def add_event_change(self, event_name, time_string, duration_string, year_num, month_name, day_name, date_num, db_handler):
+    #     new_event = DocumentedEvent(event_name, time_string, duration_string)
+    #     add_change = Add(new_event, year_num, month_name, day_name, date_num, db_handler)
+    #     self.changes.append(add_change)
+
+    def add_event_change(self, event_name, time, duration, year_num, month_name, day_name, date_num, db_handler):
+        new_event = DocumentedEvent(event_name, time, duration)
         add_change = Add(new_event, year_num, month_name, day_name, date_num, db_handler)
         self.changes.append(add_change)
 

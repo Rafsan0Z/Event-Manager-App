@@ -43,6 +43,11 @@ class DateFuncs:
             if target_date.weekday() == days_list.index(day_name.lower()):
                 result.append(day)
         return result
+    
+    def getDay(self, year_num, month_name, date_num):
+        target_day = date(year_num, month_list.index(month_name.lower()) + 1, date_num)
+        return days_list[target_day.weekday()]
+
 
 class InfoFuncs:
 
@@ -75,7 +80,7 @@ class InfoFuncs:
     def getNumofEvents(self):
         return self.year_list.num_events()
     
-    
+
     def getTodaysEvents(self):
         today_year = datetime.now().year
         today_month = month_list[datetime.now().month - 1]
