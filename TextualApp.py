@@ -7,7 +7,7 @@ from DocHandler import DocFactory
 from DBHandler import DBFactory
 from Changes import ChangeList
 from DataFuncs import DateFuncs, InfoFuncs, StatFuncs, PlotFuncs
-
+from EventExceptions import BadEnvException
 class DefaultScreen(Screen):
 
     def __init__(self):
@@ -351,25 +351,18 @@ class PlotTimeScreen(DefaultScreen):
         yield Footer()
 
 
-class ByYear(DefaultScreen):
+class DefaultPlotScreen(DefaultScreen):
 
-    def __init__(self):
-        super().__init__()
-        if isinstance(self.parent_screen, PlotEventScreen):
-            self.plot_func = PlotFuncs(self.app.handler).plot_events_year
-        elif isinstance(self.parent_screen, PlotTimeScreen):
-            self.plot_func = PlotFuncs(self.app.handler).plot_time_year
-
-    @on(Button.Pressed, "#show")
+    @on(Button.Pressed, '#show')
     def show_plot(self):
         plt, self.fig = self.plot_func()
         plt.show()
     
-    @on(Button.Pressed, "#save")
+    @on(Button.Pressed, '#save')
     def save_plot(self):
-        if not self.fig:
+        if not hasattr(self, 'fig'):
             self.fig = self.plot_func()[-1]
-        # save it here
+        self.app.push_screen(SavePlotScreen(self.fig))
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -379,6 +372,15 @@ class ByYear(DefaultScreen):
             self.ExitButton()
         )
         yield Footer()
+
+class ByYear(DefaultPlotScreen):
+
+    def __init__(self):
+        super().__init__()
+        if isinstance(self.parent_screen, PlotEventScreen):
+            self.plot_func = PlotFuncs(self.app.handler).plot_events_year
+        elif isinstance(self.parent_screen, PlotTimeScreen):
+            self.plot_func = PlotFuncs(self.app.handler).plot_time_year
 
 class ByMonth(DefaultScreen):
 
@@ -417,6 +419,25 @@ class ByDate(DefaultScreen):
         )
         yield Footer()
 
+class SavePlotScreen(DefaultScreen):
+
+    def __init__(self, fig):
+        super().__init__()
+        self.fig = fig
+
+    def compose(self) -> ComposeResult:
+        yield Header()
+        yield VerticalScroll(
+            HorizontalGroup(
+                Label("Filename:"),
+                Input(type="text", id="filename"),
+                Label(".jpg"),
+            ),
+            Button("Save", id="save"),
+            self.ExitButton()
+        )
+        yield Footer()
+
 class InfoScreen(DefaultScreen):
 
     def __init__(self):
@@ -445,14 +466,54 @@ class InfoScreen(DefaultScreen):
         )
         yield Footer()
 
+class ErrorScreen(Screen):
+
+    def __init__(self, req, opt):
+        self.req = req
+        self.opt = opt
+        super().__init__()
+
+    @on(Button.Pressed, '#exit')
+    def exit_app(self):
+        self.app.exit()
+
+    def generate_labels(self):
+        labels = [Label("The following required environment variables are missing: ")]
+        index = 0
+        for req in self.req:
+            labels.append(Label(f'{index + 1} {req}'))
+            index += 1
+        if self.opt: 
+            labels.append(Label("The following optional environment variables are also missing: "))
+        index = 0
+        for opt in self.opt:
+            labels.append(Label(f'{index + 1} {opt}'))
+        return labels
+
+
+
+    def compose(self):
+        yield Header()
+        yield VerticalScroll(
+            *self.generate_labels(),
+            Button('Exit', id='exit')
+        )
+        yield Footer()
+
 class EventManager(App):
 
     def __init__(self):
         super().__init__()
-        DocFactory()
-        self.handler = DBFactory()
-        self.changeList = ChangeList()
-
+        try:
+            DocFactory()
+        except BadEnvException as b:
+            self.fail = True
+            self.reqs = b.missing_req
+            self.opts = b.missing_opt
+        else:
+            self.handler = DBFactory()
+            self.changeList = ChangeList()
+            self.fail = False
 
     CSS_PATH = "test.tcss"
     LIGHT_MODE = 'textual-light'
@@ -461,7 +522,10 @@ class EventManager(App):
     ]
 
     def on_mount(self):
-        self.push_screen(MainScreen())
+        if self.fail:
+            self.push_screen(ErrorScreen(self.reqs, self.opts))
+        else:
+            self.push_screen(MainScreen())
 
     def action_dark_toggle(self) -> None:
         self.theme = (

@@ -88,6 +88,14 @@ class Event:
     def get_name(self):
         return self.event_name
     
+    def get_folder_name(self):
+        invalid_chars = '\\/:*?"<>|'
+        replacements = ' ' * len(invalid_chars)
+        to_delete = '\\/:?"<>|'
+        invalid_table = str.maketrans(invalid_chars, replacements, to_delete)
+        valid_name = self.event_name.translate(invalid_table)
+        return valid_name.strip()
+    
     def get_duration(self):
         return self.duration
 

@@ -130,6 +130,13 @@ class NotAnYearException(WrongTypeException):
     def __init__(self, instance):
         super().__init__(instance, "Year")
 
+class BadEnvException(Exception):
+
+    def __init__(self, message, missing_req, missing_opt):
+        self.missing_req = missing_req
+        self.missing_opt = missing_opt
+        super().__init__(message)
+
 def lower_strings(*strings):
     if len(strings) == 1:
         return strings[0].lower().strip()

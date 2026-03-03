@@ -12,10 +12,12 @@ from googleapiclient.errors import HttpError
 from dotenv import load_dotenv, find_dotenv, set_key
 from pathlib import Path
 from Event import Event, DocumentedEvent
+from EventExceptions import BadEnvException
 from Date import Date
 from Month import Month
 from Year import Year
 from YearList import YearList
+from EnvLists import required_list, optional_list
 import shelve
 
 def DocFactory():
@@ -39,6 +41,9 @@ class DocHandler:
     def __init__(self):
         self.start_time = timer()
         load_dotenv()
+        verified, missing_req, missing_opt = self.verify_env()
+        if not verified: 
+            raise BadEnvException("Something is wrong with the env file!", missing_req, missing_opt)
         self.creds = None
         self.validate()
         self.test_doc()
@@ -47,7 +52,23 @@ class DocHandler:
         DocHandler.num += 1
 
     def __del__(self):
-        DocHandler.num -= 1
+        if DocHandler.num > 0:
+            DocHandler.num -= 1
+
+    def verify_env(self):
+        missing_req = []
+        missing_opt = []
+        code = 1
+        for req in required_list:
+            if req not in os.environ:
+                missing_req.append(req)
+        for op in optional_list:
+            if op in os.environ:
+                setattr(self, op.lower(), os.getenv(op))
+            else:
+                missing_opt.append(op)
+        if len(missing_req): code = 0
+        return code, missing_req, missing_opt
 
     def flush_to_database(self):
         with shelve.open("Event_DB") as db:
@@ -105,7 +126,7 @@ class DocHandler:
         #print(time_string[:-1])
         return time_string[:-1], event_string
 
-    def process_subTab(self, subTab, month):
+    def process_subTab(self, subTab, month, path):
         for line in subTab['documentTab']['body']['content']:
             if 'paragraph' in line:
                 if 'bullet' in line['paragraph']: # We are collecting events
@@ -125,6 +146,12 @@ class DocHandler:
                     new_documented_event.add_start_index(element['startIndex'])
                     new_documented_event.add_end_index(element['endIndex'])
                     new_date.append(new_documented_event)
+                    event_path = f'{date_path}\\{new_documented_event.get_folder_name()}'
+                    recording_path = f'{event_path}\\Recording'
+                    notes_path = f'{event_path}\\Notes'
+                    for each_path in [event_path, recording_path, notes_path]:
+                        if not Path(each_path).is_dir():
+                            Path(each_path).mkdir(exist_ok=True)
                     #events_list.append(new_event)
                 else: # We are now collecting days
                     text = line['paragraph']['elements'][0]['textRun']['content'].strip()
@@ -132,6 +159,9 @@ class DocHandler:
                         month_string = text.split()[0]
                         date_string = text.split()[-1][:-2].strip()
                         new_date = Date(month_string, int(date_string))
+                        date_path = f'{path}\\{new_date.date_num} {new_date.day_name}'
+                        if not Path(date_path).is_dir():
+                            Path(date_path).mkdir(exist_ok=True)
                         month.append(new_date)
 
 
@@ -147,11 +177,17 @@ class DocHandler:
 
             for tab in document['tabs'][1:]:
                 new_year = Year(int(tab['tabProperties']['title']))
+                year_path = f'{os.getenv('STORAGE_PATH')}\\{new_year.number}'
+                if not Path(year_path).is_dir():
+                    Path(year_path).mkdir(exist_ok=True)
                 for subTab in tab.get('childTabs', []):
                     new_month = Month(subTab['tabProperties']['title'])
+                    month_path = f'{year_path}\\{new_month.month}'
+                    if not Path(month_path).is_dir():
+                        Path(month_path).mkdir(exist_ok=True)
                     new_year.append(new_month) #new_year.add_month(new_month)
                     #print(new_month.year_num)
-                    self.process_subTab(subTab, new_month)
+                    self.process_subTab(subTab, new_month, month_path)
                 database.append(new_year) #database.add_year(new_year)
             
             self.database = database
