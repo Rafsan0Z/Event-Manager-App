@@ -5,4 +5,5 @@ class Main:
     def __init__(self):
         self.handler = EmailFactory()
 
-Main()
+test = Main()
+test.handler.get_labels()

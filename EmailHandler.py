@@ -5,6 +5,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
 from pathlib import Path
+from Label import Label
 
 import os
 
@@ -23,6 +24,7 @@ class EmailHandler:
         self.creds = None
         self.SCOPES = [os.getenv("READ_ONLY_SCOPE")]
         self.validate()
+        self.service = build("gmail", "v1", credentials=self.creds)
 
     def validate(self):
         authen_path = str(Path(__file__).parent) + os.getenv('AUTHENTIFICATION_PATH')
@@ -41,5 +43,33 @@ class EmailHandler:
             with open(token_path, 'w') as token:
                 token.write(self.creds.to_json())
 
+    def process_labels(self, labels):
+        
+        processed = {}
 
+        for label in labels:
+            name = label["name"]
+            subname = None
+            if '/' in name:
+                name, subname = name.split('/')
+
+            if name not in processed:
+                processed[name] = Label(name)
+            if subname:
+                processed[name].add_sublabels(subname)
+        
+        return processed.values()
+
+            
+                
+
+    def get_labels(self):
+        results = self.service.users().labels().list(userId="me").execute()
+        labels = results.get("labels", [])
+
+        processed_labels = self.process_labels(labels)
+
+        print("These are the following labels: ")
+        for label in processed_labels:
+            print(label)
     
